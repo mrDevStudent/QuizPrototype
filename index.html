@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2>🧮 Math Quiz</h2>
+            <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="navigateToHome()">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="nav-item" onclick="showQuizSelection()">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Start Quiz</span>
+            </button>
+            <button class="nav-item" onclick="showStatistics()">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Statistics</span>
+            </button>
+            <button class="nav-item" onclick="showProfile()">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profile</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="nav-item logout-btn" onclick="handleLogout()">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-label">Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Front Page -->
+        <div id="frontPage" class="page active">
+            <div class="auth-container">
+                <h1 class="title">🧮 Math Quiz Master</h1>
+                <p class="subtitle">Test your math skills and improve your abilities!</p>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="showLoginPage()">Login</button>
+                    <button class="btn btn-secondary" onclick="showRegisterPage()">Register</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div id="loginPage" class="page">
+            <div class="auth-container">
+                <div class="form-container">
+                    <h2>Login</h2>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">Email:</label>
+                            <input type="email" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password:</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="registerPage" class="page">
+            <div class="auth-container">
+                <div class="form-container">
+                    <h2>Register</h2>
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="registerName">Full Name:</label>
+                            <input type="text" id="registerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email:</label>
+                            <input type="email" id="registerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password:</label>
+                            <input type="password" id="registerPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Page -->
+        <div id="homePage" class="page">
+            <div class="page-header">
+                <h1>Welcome, <span id="userNameDisplay">User</span>!</h1>
+                <p class="header-subtitle">Ready to test your math skills?</p>
+            </div>
+
+            <div class="home-grid">
+                <div class="home-card">
+                    <h2>📚 Quick Stats</h2>
+                    <div class="stats-summary">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalQuizzes">0</span>
+                            <span class="stat-label">Quizzes Taken</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="avgScore">0%</span>
+                            <span class="stat-label">Average Score</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="bestScore">0</span>
+                            <span class="stat-label">Best Score</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="home-card">
+                    <h2>🎮 Start a Quiz</h2>
+                    <div class="quick-quiz-buttons">
+                        <button class="quick-btn quick-easy" onclick="startQuiz('easy')">
+                            <span class="btn-icon">🟢</span>
+                            <span>Easy</span>
+                        </button>
+                        <button class="quick-btn quick-medium" onclick="startQuiz('medium')">
+                            <span class="btn-icon">🟡</span>
+                            <span>Medium</span>
+                        </button>
+                        <button class="quick-btn quick-hard" onclick="startQuiz('hard')">
+                            <span class="btn-icon">🔴</span>
+                            <span>Hard</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Selection Page -->
+        <div id="quizSelectionPage" class="page">
+            <div class="page-header">
+                <h1>📚 Select a Quiz Level</h1>
+                <p class="header-subtitle">Choose your difficulty level</p>
+            </div>
+
+            <div class="quiz-selection-grid">
+                <div class="quiz-card">
+                    <div class="card-icon">🟢</div>
+                    <h3>Easy</h3>
+                    <p class="card-desc">Basic arithmetic operations</p>
+                    <p class="card-info">10 questions • 2 minutes</p>
+                    <button class="btn btn-primary" onclick="selectQuizLevel('easy')">Select Level</button>
+                </div>
+
+                <div class="quiz-card">
+                    <div class="card-icon">🟡</div>
+                    <h3>Medium</h3>
+                    <p class="card-desc">Intermediate math problems</p>
+                    <p class="card-info">10 questions • 2 minutes</p>
+                    <button class="btn btn-primary" onclick="selectQuizLevel('medium')">Select Level</button>
+                </div>
+
+                <div class="quiz-card">
+                    <div class="card-icon">🔴</div>
+                    <h3>Hard</h3>
+                    <p class="card-desc">Advanced math concepts</p>
+                    <p class="card-info">10 questions • 2 minutes</p>
+                    <button class="btn btn-primary" onclick="selectQuizLevel('hard')">Select Level</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Type Selection Page -->
+        <div id="gameTypeSelectionPage" class="page">
+            <div class="page-header">
+                <h1>🎮 Select Game Type</h1>
+                <p class="header-subtitle">Choose how you want to play</p>
+            </div>
+
+            <div class="game-type-grid">
+                <div class="game-type-card">
+                    <div class="type-icon">📝</div>
+                    <h3>Multiple Choice</h3>
+                    <p class="type-desc">Select the correct answer from 4 options</p>
+                    <button class="btn btn-primary" onclick="startQuiz(null, 'multipleChoice')">Play Now</button>
+                </div>
+
+                <div class="game-type-card">
+                    <div class="type-icon">✔️</div>
+                    <h3>True or False</h3>
+                    <p class="type-desc">Decide if the statement is true or false</p>
+                    <button class="btn btn-primary" onclick="startQuiz(null, 'trueOrFalse')">Play Now</button>
+                </div>
+
+                <div class="game-type-card">
+                    <div class="type-icon">🔗</div>
+                    <h3>Matching</h3>
+                    <p class="type-desc">Match expressions with their answers</p>
+                    <button class="btn btn-primary" onclick="startQuiz(null, 'matching')">Play Now</button>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top: 30px; display: block; margin-left: auto; margin-right: auto;" onclick="showQuizSelection()">Back to Levels</button>
+        </div>
+
+        <!-- Statistics Page -->
+        <div id="statisticsPage" class="page">
+            <div class="page-header">
+                <h1>📊 Your Statistics</h1>
+                <p class="header-subtitle">Track your progress</p>
+            </div>
+
+            <div id="statsContainer" class="stats-container">
+                <p class="no-stats">No quiz attempts yet. Start your first quiz!</p>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profilePage" class="page">
+            <div class="page-header">
+                <h1>👤 Your Profile</h1>
+                <p class="header-subtitle">Your account information</p>
+            </div>
+
+            <div class="profile-container">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">👤</div>
+                        <div class="profile-info">
+                            <h2 id="profileName">User Name</h2>
+                            <p id="profileEmail">user@email.com</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <label>Total Quizzes:</label>
+                            <span id="profileQuizzes">0</span>
+                        </div>
+                        <div class="profile-stat">
+                            <label>Average Score:</label>
+                            <span id="profileAvg">0%</span>
+                        </div>
+                        <div class="profile-stat">
+                            <label>Best Score:</label>
+                            <span id="profileBest">0/10</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="navigateToHome()">Back to Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Page -->
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-info">
+                    <h2 id="quizTitle">Math Quiz</h2>
+                    <span id="questionCounter" class="counter">1/10</span>
+                </div>
+                <div class="timer" id="timer">
+                    <span id="timeDisplay">2:00</span>
+                </div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="question-section">
+                    <h3 id="questionText">Question</h3>
+                    <div id="answersContainer" class="answers-grid"></div>
+                </div>
+                <div class="quiz-footer">
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display: none;">Next Question</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div id="resultsPage" class="page">
+            <div class="results-container">
+                <h1 id="resultTitle">Quiz Complete!</h1>
+                <div class="results-box">
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <span id="finalScore">0</span>
+                            <span class="score-label">out of 10</span>
+                        </div>
+                    </div>
+                    <div class="results-details">
+                        <p><strong>Level:</strong> <span id="resultLevel">Easy</span></p>
+                        <p><strong>Correct Answers:</strong> <span id="correctCount">0</span>/10</p>
+                        <p><strong>Time Taken:</strong> <span id="timeTaken">0s</span></p>
+                        <p><strong>Percentage:</strong> <span id="resultPercentage">0%</span></p>
+                    </div>
+                </div>
+
+                <div class="results-review" id="resultsReview"></div>
+
+                <div class="results-buttons">
+                    <button class="btn btn-primary" onclick="navigateToHome()">Go to Home</button>
+                    <button class="btn btn-secondary" onclick="retakeQuiz()">Retake Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
