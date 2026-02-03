@@ -10,22 +10,53 @@ function shuffleArray(array) {
 
 // Page Navigation
 function showPage(pageId) {
+    // If leaving the quiz page, make sure the quiz timer is stopped to avoid multiple timers running
+    if (pageId !== 'quizPage' && quizTimer) {
+        clearInterval(quizTimer);
+        quizTimer = null;
+        // reset display
+        document.getElementById('timeDisplay').textContent = '2:00';
+    }
+
+    // Hide sidebar on public pages (landing, login, register). Show sidebar on internal pages when logged in.
+    const sidebar = document.getElementById('sidebar');
+    if (pageId === 'frontPage' || pageId === 'loginPage' || pageId === 'registerPage') {
+        sidebar.style.display = 'none';
+        document.querySelector('.main-content').style.marginLeft = '0';
+    } else {
+        // show sidebar only if the user is logged in
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            sidebar.style.display = 'flex';
+            document.querySelector('.main-content').style.marginLeft = '280px';
+        } else {
+            sidebar.style.display = 'none';
+            document.querySelector('.main-content').style.marginLeft = '0';
+        }
+    }
+
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
     updateSidebarMenu(pageId);
 }
 
 function updateSidebarMenu(pageId) {
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    
+    const items = document.querySelectorAll('.nav-item');
+    items.forEach(item => item.classList.remove('active'));
+
+    // nav order: Home(0), Start(1), Stats(2), Profile(3), About(4), Contact(5), Logout(6)
     if (pageId === 'homePage') {
-        document.querySelectorAll('.nav-item')[0].classList.add('active');
-    } else if (pageId === 'quizSelectionPage') {
-        document.querySelectorAll('.nav-item')[1].classList.add('active');
+        if (items[0]) items[0].classList.add('active');
+    } else if (pageId === 'quizSelectionPage' || pageId === 'gameTypeSelectionPage') {
+        if (items[1]) items[1].classList.add('active');
     } else if (pageId === 'statisticsPage') {
-        document.querySelectorAll('.nav-item')[2].classList.add('active');
+        if (items[2]) items[2].classList.add('active');
     } else if (pageId === 'profilePage') {
-        document.querySelectorAll('.nav-item')[3].classList.add('active');
+        if (items[3]) items[3].classList.add('active');
+    } else if (pageId === 'aboutPage') {
+        if (items[4]) items[4].classList.add('active');
+    } else if (pageId === 'contactPage') {
+        if (items[5]) items[5].classList.add('active');
     }
 }
 
@@ -59,6 +90,185 @@ function showProfile() {
     loadProfile();
     showPage('profilePage');
 }
+
+function showAbout() {
+    showPage('aboutPage');
+}
+
+function showContact() {
+    showPage('contactPage');
+}
+
+function handleContactSubmit(event) {
+    event.preventDefault();
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const phone = document.getElementById('contactPhone').value.trim();
+    const message = document.getElementById('contactMessage').value.trim();
+
+    if (!name || !email || !message) {
+        alert('Please fill in name, email and message.');
+        return;
+    }
+
+    const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+    messages.push({ name, email, phone, message, date: new Date().toISOString() });
+    localStorage.setItem('contactMessages', JSON.stringify(messages));
+
+    // simple confirmation
+    alert('Thanks — your message was saved. We will get back to you.');
+
+    // clear form
+    document.getElementById('contactForm').reset();
+}
+
+// Uploads are managed on the backend; frontend will probe Uploads/ for expected filenames and apply images if present.
+
+function loadAssetsConfig(forceLocalOnly = false) {
+    // Priority: localStorage config if exists, otherwise try Fetch icons.json from Uploads/
+    const local = localStorage.getItem('uploadsConfig');
+    if (local && !forceLocalOnly) {
+        try {
+            applyAssetsFromConfig(JSON.parse(local));
+            return;
+        } catch (e) { console.warn('Invalid local uploadsConfig'); }
+    }
+
+    if (!forceLocalOnly) {
+        fetch('Uploads/icons.json')
+            .then(r => {
+                if (!r.ok) throw new Error('no icons.json');
+                return r.json();
+            })
+            .then(cfg => applyAssetsFromConfig(cfg))
+            .catch(() => {
+                // no remote config found; fall back to local only or probe defaults
+                if (local) applyAssetsFromConfig(JSON.parse(local));
+                else probeAndApplyDefaults();
+            });
+    } else if (local) {
+        applyAssetsFromConfig(JSON.parse(local));
+    }
+}
+
+function applyAssetsFromConfig(cfg) {
+    // Textures
+    if (cfg.textures && cfg.textures.body) {
+        const url = `Uploads/${cfg.textures.body}`;
+        // Try to load image quickly
+        const img = new Image();
+        img.onload = () => {
+            document.body.style.backgroundImage = `url('${url}'), linear-gradient(135deg, #667eea 0%, #764ba2 100%)`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundRepeat = 'no-repeat';
+        };
+        img.onerror = () => console.warn('Body texture not found:', url);
+        img.src = url;
+    }
+
+    // Icons
+    if (cfg.icons) {
+        const setIcon = (selector, filename, size='24px') => {
+            const url = `Uploads/${filename}`;
+            document.querySelectorAll(selector).forEach(el => {
+                el.style.backgroundImage = `url('${url}')`;
+                el.style.backgroundSize = size + ' ' + size;
+                el.style.backgroundRepeat = 'no-repeat';
+                el.style.backgroundPosition = 'center';
+                // remove emoji/text so image shows
+                el.textContent = '';
+            });
+        };
+
+        if (cfg.icons.easy) setIcon('.quick-easy .btn-icon', cfg.icons.easy, '28px');
+        if (cfg.icons.medium) setIcon('.quick-medium .btn-icon', cfg.icons.medium, '28px');
+        if (cfg.icons.hard) setIcon('.quick-hard .btn-icon', cfg.icons.hard, '28px');
+
+        if (cfg.icons.logo) {
+            const url = `Uploads/${cfg.icons.logo}`;
+            const headerH2 = document.querySelector('.sidebar-header h2');
+            if (headerH2) {
+                headerH2.style.backgroundImage = `url('${url}')`;
+                headerH2.style.backgroundRepeat = 'no-repeat';
+                headerH2.style.backgroundSize = '28px 28px';
+                headerH2.style.paddingLeft = '36px';
+                headerH2.style.backgroundPosition = 'left center';
+                // remove emoji so logo shows
+                headerH2.textContent = ' Math Quiz';
+            }
+        }
+
+        // nav icons mapping: home,start,stats,profile,uploads,logout
+        if (cfg.icons.home) setIcon('.nav-icon.nav-home', cfg.icons.home, '22px');
+        if (cfg.icons.start) setIcon('.nav-icon.nav-start', cfg.icons.start, '22px');
+        if (cfg.icons.stats) setIcon('.nav-icon.nav-stats', cfg.icons.stats, '22px');
+        if (cfg.icons.profile) setIcon('.nav-icon.nav-profile', cfg.icons.profile, '22px');
+        if (cfg.icons.uploads) setIcon('.nav-icon.nav-uploads', cfg.icons.uploads, '22px');
+        if (cfg.icons.logout) setIcon('.nav-item.logout-btn .nav-icon', cfg.icons.logout, '22px');
+    }
+}
+
+// Load assets on page load
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('sidebar').style.display = 'none';
+    // Try to load assets config automatically
+    loadAssetsConfig();
+});
+
+// Probe Uploads/ for default filenames and apply any images found automatically
+function probeAndApplyDefaults() {
+    const expected = {
+        easy: '.quick-easy .btn-icon',
+        medium: '.quick-medium .btn-icon',
+        hard: '.quick-hard .btn-icon',
+        logo: '.sidebar-header h2',
+        home: '.nav-icon.nav-home',
+        start: '.nav-icon.nav-start',
+        stats: '.nav-icon.nav-stats',
+        profile: '.nav-icon.nav-profile',
+        uploads: '.nav-icon.nav-uploads',
+        logout: '.nav-item.logout-btn .nav-icon',
+        'my-texture': 'body'
+    };
+    const exts = ['png','jpg','jpeg','svg'];
+
+    Object.keys(expected).forEach(key => {
+        for (const ext of exts) {
+            const url = `Uploads/${key}.${ext}`;
+            const img = new Image();
+            img.onload = (() => {
+                // apply when loaded
+                if (key === 'my-texture') {
+                    document.body.style.backgroundImage = `url('${url}'), linear-gradient(135deg, #667eea 0%, #764ba2 100%)`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                } else if (key === 'logo') {
+                    const headerH2 = document.querySelector('.sidebar-header h2');
+                    if (headerH2) {
+                        headerH2.style.backgroundImage = `url('${url}')`;
+                        headerH2.style.backgroundRepeat = 'no-repeat';
+                        headerH2.style.backgroundSize = '28px 28px';
+                        headerH2.style.paddingLeft = '36px';
+                        headerH2.style.backgroundPosition = 'left center';
+                        headerH2.textContent = ' Math Quiz';
+                    }
+                } else {
+                    const selector = expected[key];
+                    document.querySelectorAll(selector).forEach(el => {
+                        el.style.backgroundImage = `url('${url}')`;
+                        el.style.backgroundSize = '22px 22px';
+                        el.style.backgroundRepeat = 'no-repeat';
+                        el.style.backgroundPosition = 'center';
+                        el.textContent = '';
+                    });
+                }
+            }).bind(null);
+            img.onerror = () => {};
+            img.src = url;
+        }
+    });
+}
+
 
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
@@ -140,8 +350,7 @@ function handleLogin(event) {
         document.getElementById('loginEmail').value = '';
         document.getElementById('loginPassword').value = '';
         
-        // Show sidebar and navigate to home
-        document.getElementById('sidebar').style.display = 'flex';
+        // Navigate to home (showPage will decide whether to display sidebar based on login state)
         navigateToHome();
     } else {
         alert('Invalid email or password!');
@@ -350,13 +559,12 @@ function startQuiz(level, gameType) {
             correct: q.correct
         }));
     } else if (gameType === 'matching') {
-        // Shuffle the answer options in the matching pairs
-        allQuestions = allQuestions.map(set => ({
-            pairs: set.pairs.map(pair => ({
-                left: pair.left,
-                right: pair.right
-            }))
-        }));
+        // For matching, pick one random set and shuffle its pairs
+        const sets = allQuestions;
+        const chosenSet = shuffleArray(sets)[0];
+        const shuffledPairs = shuffleArray(chosenSet.pairs.map(pair => ({ left: pair.left, right: pair.right })));
+        // Store as a single matching set (10 pairs)
+        allQuestions = [{ pairs: shuffledPairs }];
     }
     
     // Shuffle question order
@@ -413,13 +621,26 @@ function displayQuestion() {
         falseBtn.onclick = () => selectAnswer(false);
         answersContainer.appendChild(falseBtn);
     } else if (currentQuiz.gameType === 'matching') {
-        document.getElementById('questionText').textContent = `Match the items (${currentQuiz.currentQuestion + 1}/${currentQuiz.questions.length})`;
+        // Matching UI: left items numbered 1..N, right items lettered A..J
+        const matchingPairs = question.pairs;
+        const totalPairs = matchingPairs.length;
+        document.getElementById('questionText').textContent = `Match the following math expressions with their answers (1-${totalPairs} / A-${String.fromCharCode(64 + totalPairs)})`;
+        document.getElementById('questionCounter').textContent = `1/${totalPairs}`;
         answersContainer.className = 'matching-container';
         
-        const matchingPairs = question.pairs;
+        // Prepare letters A..J
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').slice(0, totalPairs);
         const shuffledRights = shuffleArray(matchingPairs.map(p => p.right));
         
-        // Create matching interface
+        // Ensure selectedAnswers map exists and is empty for this matching set
+        currentQuiz.selectedAnswers[currentQuiz.currentQuestion] = new Array(totalPairs).fill(null); // stores chosen letter
+        currentQuiz.matchingPairs = matchingPairs; // keep reference for scoring
+        
+        // Track which right items are used
+        currentQuiz._rightUsed = {};
+        currentQuiz._selectedLeft = null; // index of currently selected left item
+        currentQuiz._letterMap = {};
+        
         const leftColumn = document.createElement('div');
         leftColumn.className = 'matching-column left-column';
         
@@ -429,16 +650,26 @@ function displayQuestion() {
         matchingPairs.forEach((pair, index) => {
             const leftItem = document.createElement('div');
             leftItem.className = 'matching-item left-item';
-            leftItem.textContent = pair.left;
+            leftItem.textContent = `${index + 1}) ${pair.left}`;
             leftItem.dataset.index = index;
+            leftItem.onclick = () => {
+                // select this left
+                currentQuiz._selectedLeft = index;
+                document.querySelectorAll('.left-item').forEach(li => li.classList.remove('selected'));
+                leftItem.classList.add('selected');
+            };
             leftColumn.appendChild(leftItem);
         });
         
-        shuffledRights.forEach((right) => {
+        shuffledRights.forEach((rightValue, i) => {
             const rightItem = document.createElement('div');
             rightItem.className = 'matching-item right-item';
-            rightItem.textContent = right;
-            rightItem.onclick = () => handleMatchingSelection(right);
+            rightItem.dataset.letter = letters[i];
+            rightItem.dataset.value = rightValue;
+            rightItem.textContent = `${letters[i]}) ${rightValue}`;
+            // store letter->value mapping for review
+            currentQuiz._letterMap[letters[i]] = rightValue;
+            rightItem.onclick = () => handleMatchingSelection(letters[i], rightValue, rightItem);
             rightColumn.appendChild(rightItem);
         });
         
@@ -490,49 +721,88 @@ function selectAnswer(answer) {
     document.getElementById('nextBtn').style.display = 'block';
 }
 
-function handleMatchingSelection(selectedRight) {
-    const question = currentQuiz.questions[currentQuiz.currentQuestion];
-    const matchingPairs = question.pairs;
-    
-    // For matching, we'll store the selections as they make them
-    if (!currentQuiz.selectedAnswers[currentQuiz.currentQuestion]) {
-        currentQuiz.selectedAnswers[currentQuiz.currentQuestion] = [];
+function handleMatchingSelection(letter, value, rightElem) {
+    const totalPairs = currentQuiz.matchingPairs.length;
+    const leftIndex = currentQuiz._selectedLeft;
+
+    if (leftIndex === null || leftIndex === undefined) {
+        alert('Please select a left item (1-10) first.');
+        return;
     }
-    
+
+    // Ensure the selectedAnswers entry exists
+    if (!currentQuiz.selectedAnswers[currentQuiz.currentQuestion]) {
+        currentQuiz.selectedAnswers[currentQuiz.currentQuestion] = new Array(totalPairs).fill(null);
+    }
+
     const userSelections = currentQuiz.selectedAnswers[currentQuiz.currentQuestion];
-    
-    // Mark this right item as selected
-    const rightItems = document.querySelectorAll('.right-item');
-    rightItems.forEach(item => {
-        item.classList.remove('matched');
-        if (item.textContent === selectedRight) {
-            item.classList.add('matched');
-        }
-    });
-    
-    // When all pairs are matched, show next button
-    if (userSelections.length === matchingPairs.length) {
-        // Check if all matches are correct
-        let allCorrect = true;
-        matchingPairs.forEach((pair, index) => {
-            if (userSelections[index] !== pair.right) {
-                allCorrect = false;
-            }
+
+    // If this right item is already used by another left, prevent reuse
+    if (currentQuiz._rightUsed[letter] !== undefined && currentQuiz._rightUsed[letter] !== leftIndex) {
+        alert('That option is already used. Choose another.');
+        return;
+    }
+
+    // If this left already had a selection, free the previous right item
+    const previousLetter = userSelections[leftIndex];
+    if (previousLetter) {
+        // find previous right elem and unmark
+        const prevRightElem = Array.from(document.querySelectorAll('.right-item')).find(e => e.dataset.letter === previousLetter);
+        if (prevRightElem) prevRightElem.classList.remove('matched');
+        delete currentQuiz._rightUsed[previousLetter];
+    }
+
+    // Assign this right to the selected left
+    userSelections[leftIndex] = letter; // store letter for review
+    currentQuiz._rightUsed[letter] = leftIndex;
+
+    // Update UI: mark this right as matched and show letter next to left
+    rightElem.classList.add('matched');
+    const leftItem = document.querySelector(`.left-item[data-index='${leftIndex}']`);
+    if (leftItem) {
+        // Show assigned letter on the left item
+        leftItem.querySelector('.assigned-letter')?.remove();
+        const span = document.createElement('span');
+        span.className = 'assigned-letter';
+        span.style.marginLeft = '10px';
+        span.style.fontWeight = '700';
+        span.textContent = `(${letter})`;
+        leftItem.appendChild(span);
+        leftItem.classList.remove('selected');
+    }
+
+    // Clear selectedLeft so user explicitly selects next left
+    currentQuiz._selectedLeft = null;
+
+    // If all lefts have answers, compute score for this matching set and enable Next
+    const allAssigned = userSelections.every(s => s !== null);
+    if (allAssigned) {
+        // count correct matches
+        let correctCount = 0;
+        userSelections.forEach((chosenLetter, idx) => {
+            const chosenRightValue = Array.from(document.querySelectorAll('.right-item')).find(e => e.dataset.letter === chosenLetter).dataset.value;
+            if (chosenRightValue === currentQuiz.matchingPairs[idx].right) correctCount++;
         });
-        
-        if (allCorrect) {
-            currentQuiz.score++;
-        }
-        
+        // For matching, we count correct pairs toward the score (0..N)
+        currentQuiz.score += correctCount;
+
+        // store number correct for review if needed
+        currentQuiz._lastMatchingCorrect = correctCount;
+
         document.getElementById('nextBtn').style.display = 'block';
     }
 }
 
 function nextQuestion() {
+    if (currentQuiz.gameType === 'matching') {
+        // Matching is a single set of N pairs that were scored per-pair, so finishing the set ends the quiz
+        endQuiz();
+        return;
+    }
+
     currentQuiz.currentQuestion++;
-    
-    const maxQuestions = currentQuiz.gameType === 'matching' ? currentQuiz.questions.length : 10;
-    
+    const maxQuestions = 10;
+
     if (currentQuiz.currentQuestion < maxQuestions) {
         displayQuestion();
     } else {
@@ -541,8 +811,17 @@ function nextQuestion() {
 }
 
 function startTimer() {
+    // Ensure no previous timer is running
+    if (quizTimer) {
+        clearInterval(quizTimer);
+        quizTimer = null;
+    }
+
     let timeLeft = currentQuiz.timeLimit;
-    
+    const minutesInit = Math.floor(timeLeft / 60);
+    const secondsInit = timeLeft % 60;
+    document.getElementById('timeDisplay').textContent = `${minutesInit}:${secondsInit < 10 ? '0' : ''}${secondsInit}`;
+
     quizTimer = setInterval(() => {
         timeLeft--;
         const minutes = Math.floor(timeLeft / 60);
@@ -552,6 +831,7 @@ function startTimer() {
         
         if (timeLeft <= 0) {
             clearInterval(quizTimer);
+            quizTimer = null;
             endQuiz();
         }
     }, 1000);
@@ -559,10 +839,11 @@ function startTimer() {
 
 function endQuiz() {
     clearInterval(quizTimer);
-    
+    quizTimer = null;
+
     const timeTaken = Math.floor((Date.now() - currentQuiz.startTime) / 1000);
-    const totalQuestions = currentQuiz.gameType === 'matching' ? currentQuiz.questions.length : 10;
-    const percentage = Math.round((currentQuiz.score / totalQuestions) * 100);
+    const totalQuestions = currentQuiz.gameType === 'matching' ? (currentQuiz.matchingPairs ? currentQuiz.matchingPairs.length : 0) : 10;
+    const percentage = totalQuestions > 0 ? Math.round((currentQuiz.score / totalQuestions) * 100) : 0;
     
     // Save quiz result
     const user = JSON.parse(localStorage.getItem('currentUser'));
@@ -623,21 +904,21 @@ function endQuiz() {
             `;
         });
     } else if (currentQuiz.gameType === 'matching') {
-        currentQuiz.questions.forEach((question, index) => {
-            const matchingPairs = question.pairs;
-            reviewHtml += `<div class="result-item"><div class="result-question">Matching Set ${index + 1}</div>`;
-            matchingPairs.forEach((pair, pIndex) => {
-                const userAnswer = currentQuiz.selectedAnswers[index] ? currentQuiz.selectedAnswers[index][pIndex] : 'Not answered';
-                const isCorrect = userAnswer === pair.right;
-                reviewHtml += `
-                    <div class="result-answer">
-                        ${pair.left} → <span class="${isCorrect ? 'result-correct' : 'result-incorrect'}">${userAnswer}</span>
-                        ${!isCorrect ? ` (Correct: <span class="result-correct">${pair.right}</span>)` : ''}
-                    </div>
-                `;
-            });
-            reviewHtml += '</div>';
+        const matchingPairs = currentQuiz.matchingPairs || (currentQuiz.questions[0] && currentQuiz.questions[0].pairs) || [];
+        const userLetters = (currentQuiz.selectedAnswers && currentQuiz.selectedAnswers[0]) ? currentQuiz.selectedAnswers[0] : [];
+        reviewHtml += `<div class="result-item"><div class="result-question">Matching Review</div>`;
+        matchingPairs.forEach((pair, pIndex) => {
+            const chosenLetter = userLetters[pIndex];
+            const chosenValue = chosenLetter ? (currentQuiz._letterMap ? currentQuiz._letterMap[chosenLetter] : 'Unknown') : 'Not answered';
+            const isCorrect = chosenValue === pair.right;
+            reviewHtml += `
+                <div class="result-answer">
+                    ${pIndex + 1}) ${pair.left} → ${chosenLetter ? chosenLetter + ') ' + chosenValue : chosenValue}
+                    ${isCorrect ? `<span class="result-correct"> (Correct)</span>` : ` <span class="result-incorrect">(Correct: ${pair.right})</span>`}
+                </div>
+            `;
         });
+        reviewHtml += '</div>';
     }
     
     document.getElementById('resultsReview').innerHTML = reviewHtml;
@@ -665,10 +946,19 @@ function retakeQuiz() {
 function updateHomeStats() {
     const user = JSON.parse(localStorage.getItem('currentUser'));
     
-    if (!user.quizzes || user.quizzes.length === 0) {
-        document.getElementById('totalQuizzes').textContent = '0';
-        document.getElementById('avgScore').textContent = '0%';
-        document.getElementById('bestScore').textContent = '0';
+    if (!user || !user.quizzes || user.quizzes.length === 0) {
+        // legacy elements (if present)
+        if (document.getElementById('totalQuizzes')) document.getElementById('totalQuizzes').textContent = '0';
+        if (document.getElementById('avgScore')) document.getElementById('avgScore').textContent = '0%';
+        if (document.getElementById('bestScore')) document.getElementById('bestScore').textContent = '0';
+
+        // new dashboard elements
+        if (document.getElementById('totalQuizzesSmall')) document.getElementById('totalQuizzesSmall').textContent = '0';
+        if (document.getElementById('avgScoreSmall')) document.getElementById('avgScoreSmall').textContent = '0%';
+        if (document.getElementById('bestScoreSmall')) document.getElementById('bestScoreSmall').textContent = '0/10';
+        if (document.getElementById('progressBarFill')) document.getElementById('progressBarFill').style.width = '0%';
+        if (document.getElementById('progressPercent')) document.getElementById('progressPercent').textContent = '0%';
+        renderHomeDashboard();
         return;
     }
     
@@ -676,9 +966,76 @@ function updateHomeStats() {
     const avgScore = Math.round(user.quizzes.reduce((sum, q) => sum + q.percentage, 0) / totalQuizzes);
     const bestScore = Math.max(...user.quizzes.map(q => q.score));
     
-    document.getElementById('totalQuizzes').textContent = totalQuizzes;
-    document.getElementById('avgScore').textContent = avgScore + '%';
-    document.getElementById('bestScore').textContent = bestScore + '/10';
+    // legacy elements
+    if (document.getElementById('totalQuizzes')) document.getElementById('totalQuizzes').textContent = totalQuizzes;
+    if (document.getElementById('avgScore')) document.getElementById('avgScore').textContent = avgScore + '%';
+    if (document.getElementById('bestScore')) document.getElementById('bestScore').textContent = bestScore + '/10';
+
+    // new dashboard elements
+    if (document.getElementById('totalQuizzesSmall')) document.getElementById('totalQuizzesSmall').textContent = totalQuizzes;
+    if (document.getElementById('avgScoreSmall')) document.getElementById('avgScoreSmall').textContent = avgScore + '%';
+    if (document.getElementById('bestScoreSmall')) document.getElementById('bestScoreSmall').textContent = bestScore + '/10';
+    if (document.getElementById('progressBarFill')) document.getElementById('progressBarFill').style.width = avgScore + '%';
+    if (document.getElementById('progressPercent')) document.getElementById('progressPercent').textContent = avgScore + '%';
+
+    renderHomeDashboard();
+}
+
+function renderHomeDashboard() {
+    const user = JSON.parse(localStorage.getItem('currentUser')) || { name: 'User', email: '', quizzes: [] };
+
+    // Update name and avatar
+    if (document.getElementById('dashboardName')) document.getElementById('dashboardName').textContent = user.name;
+    if (document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').textContent = user.name;
+    if (document.getElementById('dashboardAvatar')) {
+        const initials = user.name ? user.name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() : 'U';
+        document.getElementById('dashboardAvatar').textContent = initials;
+    }
+    if (document.getElementById('dashboardEmail')) document.getElementById('dashboardEmail').textContent = user.email || '';
+
+    // Recent quizzes
+    const recentEl = document.getElementById('recentQuizzes');
+    if (recentEl) {
+        recentEl.innerHTML = '';
+        if (!user.quizzes || user.quizzes.length === 0) {
+            recentEl.innerHTML = '<p class="no-recent">No attempts yet. Play a quiz to see results here.</p>';
+        } else {
+            const recent = user.quizzes.slice(-5).reverse();
+            recent.forEach(q => {
+                const div = document.createElement('div');
+                div.className = 'recent-item';
+                const left = document.createElement('div');
+                left.innerHTML = `<div><strong>${q.level.charAt(0).toUpperCase() + q.level.slice(1)}</strong> <span class="meta">${q.gameType}</span></div><div class="meta">${q.date}</div>`;
+                const right = document.createElement('div');
+                right.innerHTML = `<div><strong>${q.percentage}%</strong></div><div class="meta">${q.score}/${q.totalQuestions}</div>`;
+                div.appendChild(left);
+                div.appendChild(right);
+                recentEl.appendChild(div);
+            });
+        }
+    }
+
+    // Leaderboard (top 5 by average percentage)
+    const lb = document.getElementById('leaderboard');
+    if (lb) {
+        lb.innerHTML = '';
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        if (users.length === 0) {
+            lb.innerHTML = '<p class="no-leaderboard">No leaderboard data yet.</p>';
+        } else {
+            const ranks = users.map(u => {
+                const avg = (u.quizzes && u.quizzes.length) ? Math.round(u.quizzes.reduce((s, q) => s + q.percentage, 0) / u.quizzes.length) : 0;
+                return { name: u.name || u.email, avg };
+            }).sort((a, b) => b.avg - a.avg).slice(0, 5);
+
+            ranks.forEach((r, i) => {
+                const div = document.createElement('div');
+                div.className = 'leader-item';
+                div.innerHTML = `<div>${i + 1}. ${r.name}</div><div><strong>${r.avg}%</strong></div>`;
+                lb.appendChild(div);
+            });
+        }
+    }
 }
 
 // Statistics
@@ -701,7 +1058,7 @@ function loadStatistics() {
                     <span class="stat-date">${quiz.date}</span>
                 </div>
                 <div class="stat-info">
-                    <p><strong>Score:</strong> ${quiz.score}/10</p>
+                    <p><strong>Score:</strong> ${quiz.score}/${quiz.totalQuestions}</p>
                     <p><strong>Percentage:</strong> ${quiz.percentage}%</p>
                     <p><strong>Time:</strong> ${quiz.time}s</p>
                 </div>
