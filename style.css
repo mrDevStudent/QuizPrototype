@@ -9,7 +9,28 @@ body {
     background: #f5f7fa;
     display: flex;
     min-height: 100vh;
+    background-size: cover;
+    background-position: center;
 }
+
+/* CSS variable hooks for uploaded assets */
+:root {
+    --app-texture: none;
+}
+
+/* Small icon area inside quick buttons */
+.quick-btn .btn-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 6px;
+}
+
+/* Help ensure icons don't overlay text awkwardly */
+.quick-btn span:not(.btn-icon) { margin-left: 8px; }
 
 /* Sidebar */
 .sidebar {
@@ -84,8 +105,15 @@ body {
 .nav-icon {
     font-size: 1.3em;
     min-width: 30px;
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
+.nav-item.logout-btn .nav-icon { background-size: 22px 22px; }
 .nav-label {
     white-space: nowrap;
 }
@@ -105,7 +133,8 @@ body {
 
 /* Main Content */
 .main-content {
-    margin-left: 280px;
+    margin-left: 0; /* default when sidebar hidden */
+    transition: margin-left 240ms ease;
     flex: 1;
     min-height: 100vh;
 }
@@ -178,6 +207,15 @@ body {
     font-size: 3em;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    white-space: normal; /* allow full title text */
+    overflow: visible;
+    text-overflow: unset;
+    max-width: 100%;
+}
+
+/* Reduce font-size on small screens so it fits on one line if possible */
+@media (max-width: 480px) {
+    .title { font-size: 1.6em; }
 }
 
 .subtitle {
@@ -292,6 +330,9 @@ form button {
     color: #667eea;
     font-size: 2.5em;
     margin-bottom: 10px;
+    white-space: nowrap; /* keep header title one line */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-subtitle {
@@ -299,31 +340,121 @@ form button {
     font-size: 1.1em;
 }
 
-/* Home Page */
-.home-grid {
+/* Home Page / Dashboard */
+.dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 24px;
+    align-items: start;
 }
 
-.home-card {
+.dashboard-card {
     background: white;
     border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease;
+    padding: 22px;
+    box-shadow: 0 8px 30px rgba(34,41,76,0.06);
 }
 
-.home-card:hover {
-    transform: translateY(-5px);
+.profile-card-small {
+    text-align: center;
 }
 
-.home-card h2 {
+.profile-avatar-large {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: 700;
+    margin: 0 auto 12px;
+}
+
+.profile-stats-small {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.profile-stats-small .ps-item {
+    flex: 1;
+    background: #f5f7fa;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.main-card h2 {
     color: #667eea;
-    margin-bottom: 20px;
-    font-size: 1.5em;
+    margin-bottom: 12px;
 }
 
+.progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.progress-bar-bg {
+    background: #eef2ff;
+    border-radius: 12px;
+    height: 18px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg,#4ecdc4,#667eea);
+    width: 0%;
+    transition: width 600ms ease;
+}
+
+.progress-info {
+    font-weight: 600;
+    color: #333;
+}
+
+.recent-list {
+    margin-top: 8px;
+    display: grid;
+    gap: 10px;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    background: #fafbfd;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #eef2ff;
+}
+
+.recent-item .meta {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.actions-card h3 { color: #667eea; }
+
+.quick-actions { display:flex; flex-direction:column; gap:10px; }
+
+.leaderboard-list { margin-top: 8px; }
+
+.leader-item { display:flex; justify-content:space-between; padding:10px 8px; border-radius:8px; background:#f9fbff; border:1px solid #eef2ff; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: 240px 1fr; }
+    .actions-card { display:none; }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .profile-card-small { order: -1; }
+}
 .stats-summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -764,6 +895,21 @@ form button {
     color: #333;
 }
 
+.left-item.selected {
+    background: #eef3ff;
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102,126,234,0.12);
+}
+
+.assigned-letter {
+    background: rgba(102,126,234,0.08);
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-left: 8px;
+    color: #333;
+    font-size: 0.95em;
+    vertical-align: middle;
+}
 .right-item {
     background: #fff0f5;
     border-color: #ff6b6b;
