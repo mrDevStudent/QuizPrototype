@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Sidebar Navigation -->
-    <div id="sidebar" class="sidebar">
+    <!-- Sidebar Navigation (hidden by default until login) -->
+    <div id="sidebar" class="sidebar" style="display:none">
         <div class="sidebar-header">
             <h2>🧮 Math Quiz</h2>
             <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
@@ -16,20 +16,28 @@
         
         <nav class="sidebar-nav">
             <button class="nav-item active" onclick="navigateToHome()">
-                <span class="nav-icon">🏠</span>
+                <span class="nav-icon nav-home">🏠</span>
                 <span class="nav-label">Home</span>
             </button>
             <button class="nav-item" onclick="showQuizSelection()">
-                <span class="nav-icon">📚</span>
+                <span class="nav-icon nav-start">📚</span>
                 <span class="nav-label">Start Quiz</span>
             </button>
             <button class="nav-item" onclick="showStatistics()">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon nav-stats">📊</span>
                 <span class="nav-label">Statistics</span>
             </button>
             <button class="nav-item" onclick="showProfile()">
-                <span class="nav-icon">👤</span>
+                <span class="nav-icon nav-profile">👤</span>
                 <span class="nav-label">Profile</span>
+            </button>
+            <button class="nav-item" onclick="showAbout()">
+                <span class="nav-icon nav-about">ℹ️</span>
+                <span class="nav-label">About</span>
+            </button>
+            <button class="nav-item" onclick="showContact()">
+                <span class="nav-icon nav-contact">✉️</span>
+                <span class="nav-label">Contact</span>
             </button>
         </nav>
 
@@ -101,47 +109,120 @@
             </div>
         </div>
 
-        <!-- Home Page -->
+        <!-- Home Page (Dashboard) -->
         <div id="homePage" class="page">
             <div class="page-header">
                 <h1>Welcome, <span id="userNameDisplay">User</span>!</h1>
                 <p class="header-subtitle">Ready to test your math skills?</p>
             </div>
 
-            <div class="home-grid">
-                <div class="home-card">
-                    <h2>📚 Quick Stats</h2>
-                    <div class="stats-summary">
-                        <div class="stat-item">
-                            <span class="stat-value" id="totalQuizzes">0</span>
-                            <span class="stat-label">Quizzes Taken</span>
+            <div class="dashboard-grid">
+                <aside class="dashboard-card profile-card-small">
+                    <div id="dashboardAvatar" class="profile-avatar-large">U</div>
+                    <h3 id="dashboardName">User</h3>
+                    <p id="dashboardEmail">user@email.com</p>
+
+                    <div class="profile-stats-small">
+                        <div class="ps-item">
+                            <strong id="totalQuizzesSmall">0</strong>
+                            <span>Quizzes</span>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="avgScore">0%</span>
-                            <span class="stat-label">Average Score</span>
+                        <div class="ps-item">
+                            <strong id="avgScoreSmall">0%</strong>
+                            <span>Average</span>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="bestScore">0</span>
-                            <span class="stat-label">Best Score</span>
+                        <div class="ps-item">
+                            <strong id="bestScoreSmall">0/10</strong>
+                            <span>Best</span>
                         </div>
                     </div>
-                </div>
 
-                <div class="home-card">
-                    <h2>🎮 Start a Quiz</h2>
-                    <div class="quick-quiz-buttons">
-                        <button class="quick-btn quick-easy" onclick="startQuiz('easy')">
-                            <span class="btn-icon">🟢</span>
-                            <span>Easy</span>
-                        </button>
-                        <button class="quick-btn quick-medium" onclick="startQuiz('medium')">
-                            <span class="btn-icon">🟡</span>
-                            <span>Medium</span>
-                        </button>
-                        <button class="quick-btn quick-hard" onclick="startQuiz('hard')">
-                            <span class="btn-icon">🔴</span>
-                            <span>Hard</span>
-                        </button>
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button class="btn btn-primary" onclick="navigateToHome()">View Profile</button>
+                        <button class="btn btn-secondary" onclick="navigateToHome()">My Quizzes</button>
+                    </div>
+                </aside>
+
+                <main class="dashboard-card main-card">
+                    <h2>Progress</h2>
+                    <div class="progress-wrap">
+                        <div class="progress-bar-bg">
+                            <div id="progressBarFill" class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-info"><span id="progressPercent">0%</span> Average Score</div>
+                    </div>
+
+                    <h2 style="margin-top:20px;">Recent Attempts</h2>
+                    <div id="recentQuizzes" class="recent-list">
+                        <p class="no-recent">No attempts yet. Play a quiz to see results here.</p>
+                    </div>
+                </main>
+
+                <aside class="dashboard-card actions-card">
+                    <h3>Quick Start</h3>
+                    <div class="quick-actions">
+                        <button class="btn btn-primary" onclick="startQuiz('easy','multipleChoice')">Start Easy</button>
+                        <button class="btn btn-primary" onclick="startQuiz('medium','multipleChoice')">Start Medium</button>
+                        <button class="btn btn-primary" onclick="startQuiz('hard','multipleChoice')">Start Hard</button>
+                    </div>
+
+                    <h3 style="margin-top:20px;">Leaderboard</h3>
+                    <div id="leaderboard" class="leaderboard-list">
+                        <p class="no-leaderboard">No leaderboard data yet.</p>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="aboutPage" class="page">
+            <div class="page-header">
+                <h1>About</h1>
+                <p class="header-subtitle">Learn more about the project and author</p>
+            </div>
+            <div class="profile-container">
+                <div class="profile-card">
+                    <h2>Math Quiz App</h2>
+                    <p>This project is a lightweight, browser-based math quiz application designed to help learners practice arithmetic and basic math concepts. It's built with standard web technologies (HTML, CSS, JS) and stores user data locally for quick prototyping.</p>
+                    <h3 style="margin-top:16px;">Author</h3>
+                    <p>Created by an enthusiastic developer focused on learning experiences and clean user interfaces.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div id="contactPage" class="page">
+            <div class="page-header">
+                <h1>Contact</h1>
+                <p class="header-subtitle">Get in touch</p>
+            </div>
+            <div class="profile-container">
+                <div class="profile-card">
+                    <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                        <div class="form-group">
+                            <label for="contactName">Name</label>
+                            <input type="text" id="contactName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Email</label>
+                            <input type="email" id="contactEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactPhone">Phone</label>
+                            <input type="tel" id="contactPhone">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactMessage">Message</label>
+                            <textarea id="contactMessage" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+
+                    <div style="margin-top:20px;">
+                        <h3>Contact Info</h3>
+                        <p><strong>Email:</strong> hello@example.com</p>
+                        <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                        <p><strong>Address:</strong> 123 Learning Lane, Education City</p>
                     </div>
                 </div>
             </div>
@@ -262,6 +343,8 @@
                 </div>
             </div>
         </div>
+
+
 
         <!-- Quiz Page -->
         <div id="quizPage" class="page">
