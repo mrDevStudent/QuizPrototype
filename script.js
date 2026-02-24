@@ -505,7 +505,7 @@ let currentQuiz = {
     score: 0,
     selectedAnswers: [],
     startTime: 0,
-    timeLimit: 120 // 2 minutes
+    timeLimit: 60 // 1 minute
 };
 
 let quizTimer = null;
@@ -1091,4 +1091,5 @@ function loadProfile() {
     document.getElementById('profileAvg').textContent = avgScore + '%';
     document.getElementById('profileBest').textContent = bestScore + '/10';
 }
+
 
