@@ -578,7 +578,7 @@ function startQuiz(level, gameType) {
     currentQuiz.score = 0;
     currentQuiz.selectedAnswers = [];
     currentQuiz.startTime = Date.now();
-    currentQuiz.timeLimit = 120;
+    currentQuiz.timeLimit = 60;
     
     const typeLabel = gameType === 'multipleChoice' ? 'Multiple Choice' : gameType === 'trueOrFalse' ? 'True or False' : 'Matching';
     document.getElementById('quizTitle').textContent = `${level.charAt(0).toUpperCase() + level.slice(1)} - ${typeLabel}`;
@@ -1091,3 +1091,4 @@ function loadProfile() {
     document.getElementById('profileAvg').textContent = avgScore + '%';
     document.getElementById('profileBest').textContent = bestScore + '/10';
 }
+
