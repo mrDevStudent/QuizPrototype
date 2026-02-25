@@ -13,9 +13,16 @@ body {
     background-position: center;
 }
 
+/* provide a safe background color when images fail */
+body { background-color: #f5f7fa; }
+
 /* CSS variable hooks for uploaded assets */
 :root {
     --app-texture: none;
+    --color-primary: #667eea;
+    --color-accent: #4ecdc4;
+    --color-danger: #ff6b6b;
+    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* Small icon area inside quick buttons */
@@ -56,11 +63,6 @@ body {
     align-items: center;
 }
 
-.sidebar-header h2 {
-    font-size: 1.5em;
-    margin: 0;
-}
-
 .toggle-sidebar {
     background: transparent;
     border: none;
@@ -89,6 +91,13 @@ body {
     gap: 15px;
     font-size: 1em;
     transition: all 0.3s ease;
+}
+
+.nav-item:focus,
+.btn:focus,
+.answer-btn:focus {
+    outline: 3px solid rgba(102,126,234,0.25);
+    outline-offset: 2px;
 }
 
 .nav-item:hover {
@@ -314,6 +323,58 @@ body {
 .form-group input:focus {
     outline: none;
     border-color: #667eea;
+}
+
+/* Password field wrapper and toggle */
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 56px; /* room for the eye icon */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 30%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #666;
+    line-height: 0;
+    border-radius: 6px;
+}
+
+.toggle-password svg { display: block; }
+
+.toggle-password:hover { color: #667eea; }
+
+.char-counter {
+    margin-top: 6px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* invalid state for password min length */
+.invalid {
+    border-color: #ff6b6b !important;
+}
+.char-counter.invalid {
+    color: #ff6b6b !important;
 }
 
 form button {
