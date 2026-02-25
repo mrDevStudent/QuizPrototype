@@ -14,8 +14,9 @@ function showPage(pageId) {
     if (pageId !== 'quizPage' && quizTimer) {
         clearInterval(quizTimer);
         quizTimer = null;
-        // reset display
-        document.getElementById('timeDisplay').textContent = '2:00';
+        // reset display to configured quiz time
+        const t = currentQuiz && currentQuiz.timeLimit ? currentQuiz.timeLimit : 60;
+        document.getElementById('timeDisplay').textContent = formatTime(t);
     }
 
     // Hide sidebar on public pages (landing, login, register). Show sidebar on internal pages when logged in.
@@ -72,10 +73,7 @@ function showRegisterPage() {
     showPage('registerPage');
 }
 
-function navigateToHome() {
-    updateHomeStats();
-    showPage('homePage');
-}
+// navigateToHome is defined earlier; keep single definition near top
 
 function showQuizSelection() {
     showPage('quizSelectionPage');
@@ -209,11 +207,7 @@ function applyAssetsFromConfig(cfg) {
 }
 
 // Load assets on page load
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('sidebar').style.display = 'none';
-    // Try to load assets config automatically
-    loadAssetsConfig();
-});
+// (initial page setup consolidated at end of file)
 
 // Probe Uploads/ for default filenames and apply any images found automatically
 function probeAndApplyDefaults() {
@@ -281,10 +275,16 @@ function handleRegister(event) {
     const name = document.getElementById('registerName').value;
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
+    const min = parseInt(document.getElementById('registerPassword').dataset.min) || 8;
     
     // Validate inputs
     if (!name || !email || !password) {
         alert('Please fill in all fields!');
+        return;
+    }
+
+    if (password.length < min) {
+        alert(`Password must be at least ${min} characters.`);
         return;
     }
     
@@ -366,9 +366,7 @@ function handleLogout() {
 }
 
 // Hide sidebar on initial load
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('sidebar').style.display = 'none';
-});
+// (consolidated initial DOMContentLoaded below)
 
 // Quiz Questions Database - Multiple Choice
 const multipleChoiceQuizzes = {
@@ -837,6 +835,13 @@ function startTimer() {
     }, 1000);
 }
 
+// Format seconds into M:SS
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
 function endQuiz() {
     clearInterval(quizTimer);
     quizTimer = null;
@@ -845,25 +850,32 @@ function endQuiz() {
     const totalQuestions = currentQuiz.gameType === 'matching' ? (currentQuiz.matchingPairs ? currentQuiz.matchingPairs.length : 0) : 10;
     const percentage = totalQuestions > 0 ? Math.round((currentQuiz.score / totalQuestions) * 100) : 0;
     
-    // Save quiz result
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    const users = JSON.parse(localStorage.getItem('users'));
-    const userIndex = users.findIndex(u => u.id === user.id);
-    
-    const typeLabel = currentQuiz.gameType === 'multipleChoice' ? 'MC' : currentQuiz.gameType === 'trueOrFalse' ? 'T/F' : 'Match';
-    
-    users[userIndex].quizzes.push({
-        level: currentQuiz.level,
-        gameType: typeLabel,
-        score: currentQuiz.score,
-        totalQuestions: totalQuestions,
-        percentage: percentage,
-        date: new Date().toLocaleDateString(),
-        time: timeTaken
-    });
-    
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
+    // Save quiz result (only if a current user exists)
+    try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const typeLabel = currentQuiz.gameType === 'multipleChoice' ? 'MC' : currentQuiz.gameType === 'trueOrFalse' ? 'T/F' : 'Match';
+
+        if (currentUser) {
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex].quizzes = users[userIndex].quizzes || [];
+                users[userIndex].quizzes.push({
+                    level: currentQuiz.level,
+                    gameType: typeLabel,
+                    score: currentQuiz.score,
+                    totalQuestions: totalQuestions,
+                    percentage: percentage,
+                    date: new Date().toLocaleDateString(),
+                    time: timeTaken
+                });
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
+            }
+        }
+    } catch (e) {
+        console.warn('Could not persist quiz result', e);
+    }
     
     // Display results
     document.getElementById('finalScore').textContent = currentQuiz.score;
@@ -1092,6 +1104,74 @@ function loadProfile() {
     document.getElementById('profileBest').textContent = bestScore + '/10';
 }
 
+// Password visibility toggles and character limit counters
+function setupPasswordControls() {
+    const eyeOpen = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const eyeOff = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.16 21.16 0 0 1 5.06-6.94"></path><path d="M1 1l22 22"></path><path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"></path></svg>';
+
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        const max = parseInt(input.dataset.max) || parseInt(input.getAttribute('maxlength')) || 20;
+        const min = parseInt(input.dataset.min) || parseInt(input.getAttribute('minlength')) || 8;
+        const counter = document.getElementById(targetId + 'Counter');
+
+        const updateCounter = () => {
+            if (counter) counter.textContent = `${input.value.length}/${max}`;
+            // clear previous classes
+            input.classList.remove('invalid', 'valid');
+            if (counter) counter.classList.remove('invalid', 'valid');
+
+            // Do not show invalid state before the user begins typing
+            if (input.value.length === 0) {
+                return;
+            }
+
+            if (input.value.length < min) {
+                input.classList.add('invalid');
+                if (counter) counter.classList.add('invalid');
+            } else {
+                input.classList.add('valid');
+                if (counter) counter.classList.add('valid');
+            }
+        };
+
+        // initialize
+        updateCounter();
+
+        input.addEventListener('input', () => {
+            if (input.value.length > max) {
+                input.value = input.value.slice(0, max);
+            }
+            updateCounter();
+        });
+
+        // ensure icon present
+        if (!btn.innerHTML.trim()) btn.innerHTML = eyeOpen;
+
+        btn.addEventListener('click', () => {
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = eyeOff;
+                btn.setAttribute('aria-label', 'Hide password');
+            } else {
+                input.type = 'password';
+                btn.innerHTML = eyeOpen;
+                btn.setAttribute('aria-label', 'Show password');
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // initial UI state
+    const sb = document.getElementById('sidebar');
+    if (sb) sb.style.display = 'none';
+    // setup password controls and other initial assets
+    try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
+    try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
+});
 
 
 
