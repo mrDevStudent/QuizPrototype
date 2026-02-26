@@ -1,3 +1,23 @@
+// Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+// Your Firebase config
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 // Utility function to shuffle array
 function shuffleArray(array) {
     const shuffled = [...array];
@@ -118,6 +138,30 @@ function handleContactSubmit(event) {
 
     // clear form
     document.getElementById('contactForm').reset();
+    
+    async function signupUser(email, password, username) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Store Gmail + username in Firestore
+    await setDoc(doc(db, "users", user.uid), {
+      email: email,
+      username: username
+    });
+
+    alert("Account created and data stored!");
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+// Call this inside your existing signup logic
+// Example:
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+const username = document.getElementById("username").value;
+signupUser(email, password, username);
 }
 
 // Uploads are managed on the backend; frontend will probe Uploads/ for expected filenames and apply images if present.
@@ -1172,6 +1216,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
+
 
 
 
