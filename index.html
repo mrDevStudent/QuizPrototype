@@ -438,69 +438,66 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// LOGIN FUNCTION
 async function loginUser(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    // 1. Fetch user data to update the UI names
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
       const userData = userDoc.data();
       document.getElementById("userNameDisplay").innerText = userData.name;
       document.getElementById("dashboardName").innerText = userData.name;
       document.getElementById("dashboardEmail").innerText = userData.email;
-      document.getElementById("dashboardAvatar").innerText = userData.name.charAt(0).toUpperCase();
+      if(document.getElementById("dashboardAvatar")) {
+        document.getElementById("dashboardAvatar").innerText = userData.name.charAt(0).toUpperCase();
+      }
     }
 
     alert("Login successful!");
 
-    // 2. FIX: SHOW THE SIDEBAR
+    // --- THE FIX FOR THE SIDEBAR ---
     const sidebar = document.getElementById("sidebar");
     if (sidebar) {
-      sidebar.style.display = "flex"; // This makes the dashboard menu appear
+      // We use !important via setProperty to override any CSS files
+      sidebar.style.setProperty("display", "flex", "important");
+      sidebar.classList.add("active"); // In case your CSS uses .active to show it
     }
 
-    // 3. Navigate to the dashboard page
-    if (typeof showHomePage === "function") {
-      showHomePage(); 
-    } else if (window.navigateToHome) {
+    // Trigger the page change
+    if (typeof window.showHomePage === "function") {
+      window.showHomePage(); 
+    } else if (typeof window.navigateToHome === "function") {
       window.navigateToHome();
     }
     
   } catch (error) {
     console.error(error);
-    alert("Invalid email or password!");
+    alert("Login failed: " + error.message);
   }
 }
 
-// REGISTER FUNCTION
 async function registerUser(name, email, password) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    await setDoc(doc(db, "users", user.uid), {
+    await setDoc(doc(db, "users", userCredential.user.uid), {
       name: name,
       email: email,
       createdAt: new Date()
     });
-    alert("Account created successfully! Please login.");
+    alert("Account created! Please login.");
     if (window.showLoginPage) window.showLoginPage();
   } catch (error) {
     alert(error.message);
   }
 }
 
-// EVENT LISTENERS
 document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      loginUser(email, password);
+      loginUser(document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
     });
   }
 
@@ -508,16 +505,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (registerForm) {
     registerForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const name = document.getElementById("registerName").value;
-      const email = document.getElementById("registerEmail").value;
-      const password = document.getElementById("registerPassword").value;
-      registerUser(name, email, password);
+      registerUser(
+        document.getElementById("registerName").value,
+        document.getElementById("registerEmail").value,
+        document.getElementById("registerPassword").value
+      );
     });
   }
 });
 </script>
 </body>
 </html>
+
 
 
 
