@@ -431,7 +431,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Your config
 const firebaseConfig = {
   apiKey: "AIzaSyBZ1spljQh8ZciWKFJJreR1sHRUPCPH31o",
   authDomain: "mathquiz-681ef.firebaseapp.com",
@@ -441,18 +440,16 @@ const firebaseConfig = {
   messagingSenderId: "272568778226",
   appId: "1:272568778226:web:942f4f5773f07ed3a07f6b"
 };
-        
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// REGISTER FUNCTION
 async function registerUser(name, email, password) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Save extra data in Firestore
     await setDoc(doc(db, "users", user.uid), {
       name: name,
       email: email,
@@ -470,6 +467,7 @@ window.registerUser = registerUser;
 </script>
 </body>
 </html>
+
 
 
 
