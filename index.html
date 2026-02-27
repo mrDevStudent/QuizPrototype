@@ -98,28 +98,22 @@
             <div class="auth-container">
                 <div class="form-container">
                     <h2>Register</h2>
-                    <form onsubmit="handleRegister(event)">
-                        <div class="form-group">
-                            <label for="registerName">Full Name:</label>
-                            <input type="text" id="registerName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">Email:</label>
-                            <input type="email" id="registerEmail" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Password:</label>
-                            <div class="password-wrapper">
-                                <input type="password" id="registerPassword" required minlength="8" maxlength="20" data-min="8" data-max="20">
-                                <button type="button" class="toggle-password" data-target="registerPassword" aria-label="Show password">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                </button>
-                            </div>
-                            <div class="char-counter" id="registerPasswordCounter">0/20</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
-                        <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
-                    </form>
+<form id="registerForm">
+    <div class="form-group">
+        <label for="registerName">Full Name:</label>
+        <input type="text" id="registerName" required>
+    </div>
+    <div class="form-group">
+        <label for="registerEmail">Email:</label>
+        <input type="email" id="registerEmail" required>
+    </div>
+    <div class="form-group">
+        <label for="registerPassword">Password:</label>
+        <input type="password" id="registerPassword" required minlength="8" maxlength="20">
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+    <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
+</form>
                 </div>
             </div>
         </div>
@@ -425,11 +419,12 @@
     </div>
 
     <script src="script.js"></script>
-    <script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBZ1spljQh8ZciWKFJJreR1sHRUPCPH31o",
   authDomain: "mathquiz-681ef.firebaseapp.com",
@@ -444,10 +439,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// REGISTER FUNCTION
+// Register function
 async function registerUser(name, email, password) {
   try {
-    console.log("Register function running"); // Debugging line
+    console.log("Register function running"); // Debug
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
@@ -460,26 +455,31 @@ async function registerUser(name, email, password) {
     alert("Account created successfully!");
   } catch (error) {
     alert(error.message);
-    console.error(error); // Shows errors in console
+    console.error(error);
   }
 }
 
-document.getElementById("signupBtn").addEventListener("click", () => {
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+// Hook into your register form
+const registerForm = document.getElementById("registerForm");
+registerForm.addEventListener("submit", (e) => {
+  e.preventDefault(); // prevent default form submission
+
+  const name = document.getElementById("registerName").value;
+  const email = document.getElementById("registerEmail").value;
+  const password = document.getElementById("registerPassword").value;
 
   if (!name || !email || !password) {
     alert("Please fill all fields");
     return;
   }
 
-  console.log("Calling registerUser"); // debug line
+  console.log("Calling registerUser"); // Debug
   registerUser(name, email, password);
 });
 </script>
 </body>
 </html>
+
 
 
 
