@@ -464,15 +464,12 @@ async function loginUser(email, password) {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     alert("Login successful!");
-    if (typeof showHomePage === "function") {
-      showHomePage(); 
-    }
+    navigateToHome(); // <-- fixed
   } catch (error) {
     console.error(error);
     alert("Invalid email or password!");
   }
 }
-
 // EVENT LISTENERS 
 // Wrapped in DOMContentLoaded to ensure the HTML elements exist before we try to grab them
 document.addEventListener("DOMContentLoaded", () => {
@@ -500,6 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
