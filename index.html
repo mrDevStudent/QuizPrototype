@@ -438,6 +438,44 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// LOGIN FUNCTION
+async function loginUser(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // 1. Fetch user data to update the UI names
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      document.getElementById("userNameDisplay").innerText = userData.name;
+      document.getElementById("dashboardName").innerText = userData.name;
+      document.getElementById("dashboardEmail").innerText = userData.email;
+      document.getElementById("dashboardAvatar").innerText = userData.name.charAt(0).toUpperCase();
+    }
+
+    alert("Login successful!");
+
+    // 2. FIX: SHOW THE SIDEBAR
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) {
+      sidebar.style.display = "flex"; // This makes the dashboard menu appear
+    }
+
+    // 3. Navigate to the dashboard page
+    if (typeof showHomePage === "function") {
+      showHomePage(); 
+    } else if (window.navigateToHome) {
+      window.navigateToHome();
+    }
+    
+  } catch (error) {
+    console.error(error);
+    alert("Invalid email or password!");
+  }
+}
+
+// REGISTER FUNCTION
 async function registerUser(name, email, password) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -447,47 +485,25 @@ async function registerUser(name, email, password) {
       email: email,
       createdAt: new Date()
     });
-    alert("Account created successfully!");
-    // Automatically log them in or redirect to login page
+    alert("Account created successfully! Please login.");
     if (window.showLoginPage) window.showLoginPage();
   } catch (error) {
     alert(error.message);
   }
 }
 
-async function loginUser(email, password) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    
-    // Fetch user data from Firestore to update the UI
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    const userData = userDoc.data();
-
-    if (userData && document.getElementById("userNameDisplay")) {
-        document.getElementById("userNameDisplay").innerText = userData.name;
-        document.getElementById("dashboardName").innerText = userData.name;
-        document.getElementById("dashboardEmail").innerText = userData.email;
-    }
-
-    alert("Login successful!");
-
-    // UNLOCK THE UI: Show sidebar and go to home
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar) sidebar.style.display = "flex"; 
-    
-    if (typeof window.navigateToHome === "function") {
-      window.navigateToHome();
-    } else if (typeof window.showHomePage === "function") {
-      window.showHomePage();
-    }
-  } catch (error) {
-    console.error(error);
-    alert("Invalid email or password!");
-  }
-}
-
+// EVENT LISTENERS
 document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      loginUser(email, password);
+    });
+  }
+
   const registerForm = document.getElementById("registerForm");
   if (registerForm) {
     registerForm.addEventListener("submit", (e) => {
@@ -498,20 +514,11 @@ document.addEventListener("DOMContentLoaded", () => {
       registerUser(name, email, password);
     });
   }
-
-  const loginForm = document.getElementById("loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      loginUser(email, password);
-    });
-  }
 });
 </script>
 </body>
 </html>
+
 
 
 
