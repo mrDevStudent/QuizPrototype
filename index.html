@@ -438,55 +438,81 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// LOGIN FUNCTION
 async function loginUser(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    // Update UI text with data from Firestore
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
-      const data = userDoc.data();
-      document.getElementById("userNameDisplay").innerText = data.name;
-      document.getElementById("dashboardName").innerText = data.name;
-      document.getElementById("dashboardEmail").innerText = data.email;
+      const userData = userDoc.data();
+      document.getElementById("userNameDisplay").innerText = userData.name;
+      document.getElementById("dashboardName").innerText = userData.name;
+      document.getElementById("dashboardEmail").innerText = userData.email;
     }
 
     alert("Login successful!");
 
-    // --- CRITICAL FIXES ---
     // 1. Force the Sidebar to show
     const sidebar = document.getElementById("sidebar");
-    if (sidebar) sidebar.style.display = "flex";
+    if (sidebar) {
+      sidebar.style.setProperty("display", "flex", "important");
+    }
 
-    // 2. Execute the function from your script.js
-    // We use 'window.' because modules can't see script.js functions normally
-    if (typeof window.navigateToHome === "function") {
+    // 2. Call your existing navigation functions
+    if (typeof window.showHomePage === "function") {
+      window.showHomePage(); 
+    } else if (typeof window.navigateToHome === "function") {
       window.navigateToHome();
-    } else if (typeof window.showHomePage === "function") {
-      window.showHomePage();
     }
     
   } catch (error) {
-    alert("Login failed: " + error.message);
+    alert("Login error: " + error.message);
   }
 }
 
-// Ensure listeners are attached inside the module
+// REGISTER FUNCTION
+async function registerUser(name, email, password) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      name: name,
+      email: email,
+      createdAt: new Date()
+    });
+    alert("Account created successfully!");
+    if (window.showLoginPage) window.showLoginPage();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// --- MAKING IT PUBLIC ---
+// This attaches the functions to the global window object
+window.loginUser = loginUser;
+window.registerUser = registerUser;
+
+// Re-attach event listeners for the forms
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loginForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
     loginUser(document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
   });
-  
+
   document.getElementById("registerForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
-    // Use your register logic here...
+    registerUser(
+      document.getElementById("registerName").value,
+      document.getElementById("registerEmail").value,
+      document.getElementById("registerPassword").value
+    );
   });
 });
 </script>
 </body>
 </html>
+
 
 
 
