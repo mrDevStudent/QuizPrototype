@@ -421,9 +421,8 @@
     <script src="script.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Your Firebase config
 const firebaseConfig = {
@@ -440,10 +439,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Register function
+// REGISTER FUNCTION
 async function registerUser(name, email, password) {
   try {
-    console.log("Register function running"); // Debug
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
@@ -460,61 +458,49 @@ async function registerUser(name, email, password) {
   }
 }
 
-// Hook into your register form
-const registerForm = document.getElementById("registerForm");
-registerForm.addEventListener("submit", (e) => {
-  e.preventDefault(); // prevent default form submission
-
-  const name = document.getElementById("registerName").value;
-  const email = document.getElementById("registerEmail").value;
-  const password = document.getElementById("registerPassword").value;
-
-  if (!name || !email || !password) {
-    alert("Please fill all fields");
-    return;
-  }
-    
-
-  console.log("Calling registerUser"); // Debug
-  registerUser(name, email, password);
-    });
-
+// LOGIN FUNCTION
 async function loginUser(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log("Login successful:", user.email);
-
     alert("Login successful!");
-    // TODO: Navigate to home page after login
-    showHomePage(); 
+    if (typeof showHomePage === "function") {
+      showHomePage(); 
+    }
   } catch (error) {
     console.error(error);
-    alert("Invalid email or password!"); // same message as your screenshot
+    alert("Invalid email or password!");
   }
 }
 
-// Hook into login form
-const loginForm = document.querySelector("#loginPage form");
-loginForm.addEventListener("submit", (e) => {
-  e.preventDefault(); // prevent normal form submission
-
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-
-  if (!email || !password) {
-    alert("Please fill all fields");
-    return;
+// EVENT LISTENERS 
+// Wrapped in DOMContentLoaded to ensure the HTML elements exist before we try to grab them
+document.addEventListener("DOMContentLoaded", () => {
+  const registerForm = document.getElementById("registerForm");
+  if (registerForm) {
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("registerName").value;
+      const email = document.getElementById("registerEmail").value;
+      const password = document.getElementById("registerPassword").value;
+      registerUser(name, email, password);
+    });
   }
 
-  loginUser(email, password);
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      loginUser(email, password);
+    });
+  }
 });
-    
-
-
 </script>
 </body>
 </html>
+
 
 
 
