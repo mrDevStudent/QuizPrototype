@@ -443,37 +443,55 @@ async function loginUser(email, password) {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
+    // 1. Get user data from Firestore
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      document.getElementById("userNameDisplay").innerText = userData.name;
-      document.getElementById("dashboardName").innerText = userData.name;
-      document.getElementById("dashboardEmail").innerText = userData.email;
-      if(document.getElementById("dashboardAvatar")) {
-        document.getElementById("dashboardAvatar").innerText = userData.name.charAt(0).toUpperCase();
-      }
+      
+      // Update Name Displays
+      const nameElements = ["userNameDisplay", "dashboardName", "profileName"];
+      nameElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = userData.name;
+      });
+
+      // Update Email Displays
+      const emailElements = ["dashboardEmail", "profileEmail"];
+      emailElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = userData.email;
+      });
+
+      // Set Avatar Initial
+      const avatar = document.getElementById("dashboardAvatar");
+      if (avatar) avatar.innerText = userData.name.charAt(0).toUpperCase();
     }
 
     alert("Login successful!");
 
-    // --- THE FIX FOR THE SIDEBAR ---
+    // 2. SHOW THE SIDEBAR
     const sidebar = document.getElementById("sidebar");
     if (sidebar) {
-      // We use !important via setProperty to override any CSS files
       sidebar.style.setProperty("display", "flex", "important");
-      sidebar.classList.add("active"); // In case your CSS uses .active to show it
     }
 
-    // Trigger the page change
+    // 3. TRIGGER HOME PAGE FUNCTIONS
+    // We check if script.js functions exist and call them
     if (typeof window.showHomePage === "function") {
       window.showHomePage(); 
     } else if (typeof window.navigateToHome === "function") {
       window.navigateToHome();
     }
+
+    // 4. TRIGGER DASHBOARD RELOAD (Important for stats/recent attempts)
+    // If your script.js has a function to load stats, call it here:
+    if (typeof window.updateDashboardStats === "function") {
+        window.updateDashboardStats();
+    }
     
   } catch (error) {
-    console.error(error);
-    alert("Login failed: " + error.message);
+    console.error("Login Error:", error);
+    alert("Invalid email or password!");
   }
 }
 
@@ -493,29 +511,24 @@ async function registerUser(name, email, password) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const loginForm = document.getElementById("loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      loginUser(document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
-    });
-  }
+  document.getElementById("loginForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    loginUser(document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
+  });
 
-  const registerForm = document.getElementById("registerForm");
-  if (registerForm) {
-    registerForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      registerUser(
-        document.getElementById("registerName").value,
-        document.getElementById("registerEmail").value,
-        document.getElementById("registerPassword").value
-      );
-    });
-  }
+  document.getElementById("registerForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    registerUser(
+      document.getElementById("registerName").value,
+      document.getElementById("registerEmail").value,
+      document.getElementById("registerPassword").value
+    );
+  });
 });
 </script>
 </body>
 </html>
+
 
 
 
