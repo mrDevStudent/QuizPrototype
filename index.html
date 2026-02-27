@@ -425,8 +425,46 @@
     </div>
 
     <script src="script.js"></script>
+    <script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// 🔴 PASTE YOUR CONFIG HERE
+const firebaseConfig = {
+  apiKey: "AIzaSyBZ1spljQh8ZciWKFJJreR1sHRUPCPH31o",
+  authDomain: "mathquiz-681ef.firebaseapp.com",
+  databaseURL: "https://mathquiz-681ef-default-rtdb.firebaseio.com",
+  projectId: "mathquiz-681ef",
+  storageBucket: "mathquiz-681ef.firebasestorage.app",
+  messagingSenderId: "272568778226",
+  appId: "1:272568778226:web:942f4f5773f07ed3a07f6b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Function to save user
+async function saveUser(username, email) {
+  try {
+    await addDoc(collection(db, "users"), {
+      name: name,
+      email: email,
+      createdAt: new Date()
+    });
+    alert("User saved successfully!");
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+// Make function usable outside module
+window.saveUser = saveUser;
+
+</script>
 </body>
 </html>
+
 
 
 
