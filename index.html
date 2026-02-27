@@ -434,46 +434,17 @@ const firebaseConfig = {
   appId: "1:272568778226:web:942f4f5773f07ed3a07f6b"
 };
 
+// 1. Initialize and make Firebase public so script.js can use it
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// LOGIN FUNCTION
-async function loginUser(email, password) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      document.getElementById("userNameDisplay").innerText = userData.name;
-      document.getElementById("dashboardName").innerText = userData.name;
-      document.getElementById("dashboardEmail").innerText = userData.email;
-    }
+window.firebaseApp = app;
+window.firebaseAuth = auth;
+window.firebaseDb = db;
 
-    alert("Login successful!");
-
-    // 1. Force the Sidebar to show
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar) {
-      sidebar.style.setProperty("display", "flex", "important");
-    }
-
-    // 2. Call your existing navigation functions
-    if (typeof window.showHomePage === "function") {
-      window.showHomePage(); 
-    } else if (typeof window.navigateToHome === "function") {
-      window.navigateToHome();
-    }
-    
-  } catch (error) {
-    alert("Login error: " + error.message);
-  }
-}
-
-// REGISTER FUNCTION
-async function registerUser(name, email, password) {
+// 2. Public Register Function
+window.registerUser = async function(name, email, password) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await setDoc(doc(db, "users", userCredential.user.uid), {
@@ -486,23 +457,53 @@ async function registerUser(name, email, password) {
   } catch (error) {
     alert(error.message);
   }
-}
+};
 
-// --- MAKING IT PUBLIC ---
-// This attaches the functions to the global window object
-window.loginUser = loginUser;
-window.registerUser = registerUser;
+// 3. Public Login Function
+window.loginUser = async function(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // Fetch data to fill the dashboard
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      document.getElementById("userNameDisplay").innerText = userData.name;
+      document.getElementById("dashboardName").innerText = userData.name;
+      document.getElementById("dashboardEmail").innerText = userData.email;
+      if(document.getElementById("dashboardAvatar")) {
+          document.getElementById("dashboardAvatar").innerText = userData.name.charAt(0).toUpperCase();
+      }
+    }
 
-// Re-attach event listeners for the forms
+    alert("Login successful!");
+
+    // UNHIDE THE DASHBOARD
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) {
+        sidebar.style.setProperty("display", "flex", "important");
+    }
+
+    // CALL NAVIGATION FROM SCRIPT.JS
+    if (window.navigateToHome) window.navigateToHome();
+    else if (window.showHomePage) window.showHomePage();
+
+  } catch (error) {
+    alert("Login failed: " + error.message);
+  }
+};
+
+// 4. Re-bind the form submit listeners in this scope
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loginForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
-    loginUser(document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
+    window.loginUser(document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
   });
 
   document.getElementById("registerForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
-    registerUser(
+    window.registerUser(
       document.getElementById("registerName").value,
       document.getElementById("registerEmail").value,
       document.getElementById("registerPassword").value
@@ -512,6 +513,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
