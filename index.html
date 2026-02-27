@@ -477,28 +477,11 @@ registerForm.addEventListener("submit", (e) => {
 
   console.log("Calling registerUser"); // Debug
   registerUser(name, email, password);
-});
-    // LOGIN FUNCTION
 
-async function loginUser(email, password) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log("Login successful:", user.email);
-
-    alert("Login successful!");
-    // TODO: Navigate to home page after login
-    showHomePage(); 
-  } catch (error) {
-    console.error(error);
-    alert("Invalid email or password!"); // same message as your screenshot
-  }
-}
-
-// Hook into login form
-const loginForm = document.querySelector("#loginPage form");
+    // LOGIN FORM SUBMIT
+const loginForm = document.getElementById("loginForm");
 loginForm.addEventListener("submit", (e) => {
-  e.preventDefault(); // prevent normal form submission
+  e.preventDefault(); // prevent page reload
 
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
@@ -510,9 +493,13 @@ loginForm.addEventListener("submit", (e) => {
 
   loginUser(email, password);
 });
+    
+});
+
 </script>
 </body>
 </html>
+
 
 
 
