@@ -464,7 +464,6 @@ async function registerUser(name, email, password) {
   }
 }
 
-// Connect button to function
 document.getElementById("signupBtn").addEventListener("click", () => {
   const name = document.getElementById("name").value;
   const email = document.getElementById("email").value;
@@ -475,11 +474,13 @@ document.getElementById("signupBtn").addEventListener("click", () => {
     return;
   }
 
+  console.log("Calling registerUser"); // debug line
   registerUser(name, email, password);
 });
 </script>
 </body>
 </html>
+
 
 
 
