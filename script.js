@@ -1,14 +1,6 @@
 // Page Navigation
 // Utility functions
 // Fisher-Yates shuffle for randomizing arrays (used extensively by quiz logic)
-function shuffleArray(array) {
-    // In-place shuffle
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
 
 function showPage(pageId) {
     // If leaving the quiz page, make sure the quiz timer is stopped to avoid multiple timers running
@@ -1188,6 +1180,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
+
 
 
 
