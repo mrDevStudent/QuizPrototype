@@ -599,41 +599,7 @@ function startQuiz(level, gameType) {
     showPage('quizPage');
     displayQuestion();
     startTimer();
-
-    } else if (gameType === 'trueOrFalse') {
-        // Shuffle answer order for true/false
-        allQuestions = allQuestions.map(q => ({
-            question: q.question,
-            correct: q.correct
-        }));
-    } else if (gameType === 'matching') {
-        // For matching, pick one random set and shuffle its pairs
-        const sets = allQuestions;
-        const chosenSet = shuffleArray(sets)[0];
-        const shuffledPairs = shuffleArray(chosenSet.pairs.map(pair => ({ left: pair.left, right: pair.right })));
-        // Store as a single matching set (10 pairs)
-        allQuestions = [{ pairs: shuffledPairs }];
-    }
-    
-    // Shuffle question order
-    allQuestions = shuffleArray(allQuestions);
-    if (gameType !== 'matching') {
-        allQuestions = allQuestions.slice(0, 10);
-    }
-    
-    currentQuiz.questions = allQuestions;
-    currentQuiz.currentQuestion = 0;
-    currentQuiz.score = 0;
-    currentQuiz.selectedAnswers = [];
-    currentQuiz.startTime = Date.now();
-    currentQuiz.timeLimit = 60;
-    
-    const typeLabel = gameType === 'multipleChoice' ? 'Multiple Choice' : gameType === 'trueOrFalse' ? 'True or False' : 'Matching';
-    document.getElementById('quizTitle').textContent = `${level.charAt(0).toUpperCase() + level.slice(1)} - ${typeLabel}`;
-    
-    showPage('quizPage');
-    displayQuestion();
-    startTimer();
+  
 }
 
 function displayQuestion() {
@@ -1222,6 +1188,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
+
 
 
 
