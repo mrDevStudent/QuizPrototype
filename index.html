@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,6 +10,7 @@
 </head>
 <body>
     <!-- Sidebar Navigation (hidden by default until login) -->
+    
     <div id="sidebar" class="sidebar" style="display:none" role="navigation" aria-label="Main navigation">
         <div class="sidebar-header">
             <h2>🧮 Math Quiz</h2>
@@ -70,7 +71,7 @@
             <div class="auth-container">
                 <div class="form-container">
                     <h2>Login</h2>
-                    <form id="loginForm">
+                    <form onsubmit="handleLogin(event)">
                         <div class="form-group">
                             <label for="loginEmail">Email:</label>
                             <input type="email" id="loginEmail" required>
@@ -78,7 +79,7 @@
                         <div class="form-group">
                             <label for="loginPassword">Password:</label>
                             <div class="password-wrapper">
-                               <input type="password" id="loginPassword" required minlength="8" maxlength="20" data-min="8" data-max="20">
+                                <input type="password" id="loginPassword" required minlength="8" maxlength="20" data-min="8" data-max="20">
                                 <button type="button" class="toggle-password" data-target="loginPassword" aria-label="Show password">
                                     <!-- eye icon inserted by JS fallback -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -98,22 +99,28 @@
             <div class="auth-container">
                 <div class="form-container">
                     <h2>Register</h2>
-<form id="registerForm">
-    <div class="form-group">
-        <label for="registerName">Full Name:</label>
-        <input type="text" id="registerName" required>
-    </div>
-    <div class="form-group">
-        <label for="registerEmail">Email:</label>
-        <input type="email" id="registerEmail" required>
-    </div>
-    <div class="form-group">
-        <label for="registerPassword">Password:</label>
-        <input type="password" id="registerPassword" required minlength="8" maxlength="20">
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-    <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
-</form>
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="registerName">Full Name:</label>
+                            <input type="text" id="registerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email:</label>
+                            <input type="email" id="registerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password:</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="registerPassword" required minlength="8" maxlength="20" data-min="8" data-max="20">
+                                <button type="button" class="toggle-password" data-target="registerPassword" aria-label="Show password">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <div class="char-counter" id="registerPasswordCounter">0/20</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -417,123 +424,10 @@
             </div>
         </div>
     </div>
-
+    <script src="style.js"></script>
     <script src="script.js"></script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBZ1spljQh8ZciWKFJJreR1sHRUPCPH31o",
-  authDomain: "mathquiz-681ef.firebaseapp.com",
-  databaseURL: "https://mathquiz-681ef-default-rtdb.firebaseio.com",
-  projectId: "mathquiz-681ef",
-  storageBucket: "mathquiz-681ef.firebasestorage.app",
-  messagingSenderId: "272568778226",
-  appId: "1:272568778226:web:942f4f5773f07ed3a07f6b"
-};
-
-// 1. Initialize and make Firebase public so script.js can use it
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-window.firebaseApp = app;
-window.firebaseAuth = auth;
-window.firebaseDb = db;
-
-// 2. Public Register Function
-window.registerUser = async function(name, email, password) {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      name: name,
-      email: email,
-      createdAt: new Date()
-    });
-    alert("Account created successfully!");
-    if (window.showLoginPage) window.showLoginPage();
-  } catch (error) {
-    alert(error.message);
-  }
-};
-
-// 3. Public Login Function
-window.loginUser = async function(email, password) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    
-    // Fetch data to fill the dashboard
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      document.getElementById("userNameDisplay").innerText = userData.name;
-      document.getElementById("dashboardName").innerText = userData.name;
-      document.getElementById("dashboardEmail").innerText = userData.email;
-      if(document.getElementById("dashboardAvatar")) {
-          document.getElementById("dashboardAvatar").innerText = userData.name.charAt(0).toUpperCase();
-      }
-    }
-
-    alert("Login successful!");
-
-    // UNHIDE THE DASHBOARD
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar) {
-        sidebar.style.setProperty("display", "flex", "important");
-    }
-
-    // CALL NAVIGATION FROM SCRIPT.JS
-    if (window.navigateToHome) window.navigateToHome();
-    else if (window.showHomePage) window.showHomePage();
-
-  } catch (error) {
-    alert("Login failed: " + error.message);
-  }
-};
-
-// 4. Re-bind the form submit listeners in this scope
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("loginForm")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    window.loginUser(document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
-  });
-
-  document.getElementById("registerForm")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    window.registerUser(
-      document.getElementById("registerName").value,
-      document.getElementById("registerEmail").value,
-      document.getElementById("registerPassword").value
-    );
-  });
-});
-</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
