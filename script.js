@@ -1,4 +1,15 @@
 // Page Navigation
+// Utility functions
+// Fisher-Yates shuffle for randomizing arrays (used extensively by quiz logic)
+function shuffleArray(array) {
+    // In-place shuffle
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 function showPage(pageId) {
     // If leaving the quiz page, make sure the quiz timer is stopped to avoid multiple timers running
     if (pageId !== 'quizPage' && quizTimer) {
@@ -507,16 +518,10 @@ function selectQuizLevel(level) {
 
 function startQuiz(level, gameType) {
     // If level is null, use the selected level from the previous step
-     if (!level) {
+    if (level === null) {
         level = selectedQuizLevel;
     }
-
-    // Guard: if still no valid level, redirect back to level selection
-    if (!level) {
-        alert('Please select a difficulty level first!');
-        showPage('quizSelectionPage');
-        return;
-    }
+    
     currentQuiz.level = level;
     currentQuiz.gameType = gameType;
     
@@ -1169,8 +1174,6 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
-
-
 
 
 
