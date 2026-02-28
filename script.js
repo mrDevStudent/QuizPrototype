@@ -516,15 +516,31 @@ function selectQuizLevel(level) {
     showPage('gameTypeSelectionPage');
 }
 
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
 function startQuiz(level, gameType) {
-    // If level is null, use the selected level from the previous step
-    if (level === null) {
+    // If level is null or empty, use the selected level from the previous step
+    if (!level) {
         level = selectedQuizLevel;
     }
-    
+
+    // Guard: if still no valid level, redirect back to level selection
+    if (!level) {
+        alert('Please select a difficulty level first!');
+        showPage('quizSelectionPage');
+        return;
+    }
+
     currentQuiz.level = level;
     currentQuiz.gameType = gameType;
-    
+
     // Get questions based on game type
     let quizzesDB;
     if (gameType === 'multipleChoice') {
@@ -534,10 +550,10 @@ function startQuiz(level, gameType) {
     } else if (gameType === 'matching') {
         quizzesDB = matchingQuizzes;
     }
-    
+
     // Deep copy questions and shuffle
     let allQuestions = JSON.parse(JSON.stringify(quizzesDB[level]));
-    
+
     if (gameType === 'multipleChoice') {
         // Shuffle answer options for each question
         allQuestions = allQuestions.map(q => {
@@ -545,13 +561,45 @@ function startQuiz(level, gameType) {
             const shuffledIndices = shuffleArray(indices);
             const newCorrectIndex = shuffledIndices.indexOf(q.correct);
             const shuffledOptions = shuffledIndices.map(i => q.options[i]);
-            
+
             return {
                 question: q.question,
                 options: shuffledOptions,
                 correct: newCorrectIndex
             };
         });
+    } else if (gameType === 'trueOrFalse') {
+        allQuestions = allQuestions.map(q => ({
+            question: q.question,
+            correct: q.correct
+        }));
+    } else if (gameType === 'matching') {
+        const sets = allQuestions;
+        const chosenSet = shuffleArray(sets)[0];
+        const shuffledPairs = shuffleArray(chosenSet.pairs.map(pair => ({ left: pair.left, right: pair.right })));
+        allQuestions = [{ pairs: shuffledPairs }];
+    }
+
+    // Shuffle question order
+    allQuestions = shuffleArray(allQuestions);
+    if (gameType !== 'matching') {
+        allQuestions = allQuestions.slice(0, 10);
+    }
+
+    currentQuiz.questions = allQuestions;
+    currentQuiz.currentQuestion = 0;
+    currentQuiz.score = 0;
+    currentQuiz.selectedAnswers = [];
+    currentQuiz.startTime = Date.now();
+    currentQuiz.timeLimit = 60;
+
+    const typeLabel = gameType === 'multipleChoice' ? 'Multiple Choice' : gameType === 'trueOrFalse' ? 'True or False' : 'Matching';
+    document.getElementById('quizTitle').textContent = `${level.charAt(0).toUpperCase() + level.slice(1)} - ${typeLabel}`;
+
+    showPage('quizPage');
+    displayQuestion();
+    startTimer();
+}
     } else if (gameType === 'trueOrFalse') {
         // Shuffle answer order for true/false
         allQuestions = allQuestions.map(q => ({
@@ -1174,6 +1222,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
+
 
 
 
