@@ -599,7 +599,7 @@ function startQuiz(level, gameType) {
     showPage('quizPage');
     displayQuestion();
     startTimer();
-}
+
     } else if (gameType === 'trueOrFalse') {
         // Shuffle answer order for true/false
         allQuestions = allQuestions.map(q => ({
@@ -1222,6 +1222,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
+
 
 
 
