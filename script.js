@@ -507,10 +507,16 @@ function selectQuizLevel(level) {
 
 function startQuiz(level, gameType) {
     // If level is null, use the selected level from the previous step
-    if (level === null) {
+     if (!level) {
         level = selectedQuizLevel;
     }
-    
+
+    // Guard: if still no valid level, redirect back to level selection
+    if (!level) {
+        alert('Please select a difficulty level first!');
+        showPage('quizSelectionPage');
+        return;
+    }
     currentQuiz.level = level;
     currentQuiz.gameType = gameType;
     
@@ -1163,6 +1169,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
+
 
 
 
