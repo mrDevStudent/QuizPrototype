@@ -448,6 +448,7 @@ function clearMessages() {
     if (confirm('Delete all feedback messages?')) {
         localStorage.removeItem('contactMessages');
         loadContactMessages();
+        updateAdminStats();
     }
 }
 
@@ -465,6 +466,7 @@ function deleteUser(index) {
         localStorage.setItem('users', JSON.stringify(users));
     }
     loadAdminUsers();
+    updateAdminStats();
 }
 
 let editingUserIndex = null;
@@ -505,6 +507,7 @@ function saveEditedUser() {
     editingUserIndex = null;
     document.getElementById('editUserModal').style.display = 'none';
     loadAdminUsers();
+    updateAdminStats();
 }
 
 function cancelEdit() {
@@ -527,22 +530,40 @@ function showAdminSection(section) {
     const feedBtn = document.getElementById('navFeedback');
     if (!users || !feedback || !usersBtn || !feedBtn) return;
     if (section === 'feedback') {
-        users.style.display = 'none';
-        feedback.style.display = '';
+        users.classList.remove('active');
+        feedback.classList.add('active');
         usersBtn.classList.remove('active');
         feedBtn.classList.add('active');
     } else {
-        users.style.display = '';
-        feedback.style.display = 'none';
+        users.classList.add('active');
+        feedback.classList.remove('active');
         usersBtn.classList.add('active');
         feedBtn.classList.remove('active');
     }
+}
+
+// Update admin dashboard stats
+function updateAdminStats() {
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+    
+    const totalUsers = users.filter(u => !(u.email === 'admin' && u.password === 'admin')).length;
+    const activeUsers = users.filter(u => u.quizzes && u.quizzes.length > 0).length;
+    
+    const totalUsersEl = document.getElementById('totalUsersCount');
+    const totalMessagesEl = document.getElementById('totalMessagesCount');
+    const activeUsersEl = document.getElementById('activeUsersCount');
+    
+    if (totalUsersEl) totalUsersEl.textContent = totalUsers;
+    if (totalMessagesEl) totalMessagesEl.textContent = messages.length;
+    if (activeUsersEl) activeUsersEl.textContent = activeUsers;
 }
 
 function initPage() {
     if (document.getElementById('userTable')) {
         ensureAdmin();
         loadAdminUsers();
+        updateAdminStats();
         // wire up bottom buttons
         const editBtn = document.getElementById('editUserBtn');
         const delBtn = document.getElementById('deleteUserBtn');
@@ -560,6 +581,8 @@ function initPage() {
         });
         const cancelBtn = document.getElementById('cancelEditBtn');
         if (cancelBtn) cancelBtn.addEventListener('click', cancelEdit);
+        const closeBtn = document.getElementById('closeModalBtn');
+        if (closeBtn) closeBtn.addEventListener('click', cancelEdit);
         // load contact messages if the table exists and wire clear button
         if (document.getElementById('messageTable')) {
             loadContactMessages();
@@ -1425,6 +1448,5 @@ document.addEventListener('DOMContentLoaded', function() {
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 });
-
 
 
