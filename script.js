@@ -837,7 +837,7 @@ if (level === 'easy') {
 } else if (level === 'medium') {
     currentQuiz.timeLimit = 60; // 1 min 
 } else if (level === 'hard') {
-    currentQuiz.timeLimit = 90;   // 1 and 30 min 
+    currentQuiz.timeLimit = 150;   // 1 and 30 min 
 }
 
 displayQuestion();
@@ -1479,6 +1479,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
+
 
 
 
