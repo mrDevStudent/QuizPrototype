@@ -607,7 +607,7 @@ function initPage() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initPage);
+
 
 // Hide sidebar on initial load
 // (consolidated initial DOMContentLoaded below)
@@ -1469,6 +1469,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
+
 
 
 
