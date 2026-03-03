@@ -225,60 +225,217 @@ body { background-color: #f5f7fa; }
     justify-content: center;
 }
 
-/* Admin user table styling */
-.admin-nav {
+/* ============================================
+   ADMIN DASHBOARD STYLING
+   ============================================ */
+
+/* Main Admin Container */
+.admin-container {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf1 100%);
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    padding: 8px 16px;
-    background: #667eea;
-    border-radius: 8px;
+    flex-direction: column;
+    margin: 0;
 }
-.admin-nav .nav-tab {
-    padding: 8px 16px;
+
+/* Admin Header */
+.admin-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 60px;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    position: relative;
+}
+
+.admin-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.admin-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 0;
+    font-size: 2em;
+    font-weight: 700;
+}
+
+.admin-icon {
+    width: 40px;
+    height: 40px;
+    opacity: 0.95;
+}
+
+.admin-logout {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.admin-logout:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Dashboard Overview Stats */
+.admin-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 50px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 35px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+}
+
+.stat-card:hover {
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+    transform: translateY(-4px);
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;
+    flex-shrink: 0;
+}
+
+.stat-icon.users-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-icon.messages-icon {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-icon.active-icon {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-content h3 {
+    margin: 0 0 8px 0;
+    color: #000000;
+    font-size: 0.95em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-number {
+    margin: 0;
+    font-size: 2.2em;
+    font-weight: 700;
+    color: #000000;
+}
+
+/* Main Content Area */
+.admin-content {
+    flex: 1;
+    padding: 0 60px 50px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Tabs Navigation */
+.admin-tabs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 24px;
     background: transparent;
     border: none;
-    border-radius: 4px;
+    border-bottom: 3px solid transparent;
     cursor: pointer;
     font-weight: 600;
-    color: white;
-    transition: background 0.2s;
+    font-size: 1em;
+    color: #999;
+    transition: all 0.3s ease;
+    margin-bottom: -2px;
 }
-.admin-nav .nav-tab:hover {
-    background: rgba(255,255,255,0.2);
+
+.admin-tab:hover {
+    color: #555;
 }
-.admin-nav .nav-tab.active {
-    background: white;
+
+.admin-tab.active {
     color: #667eea;
+    border-bottom-color: #667eea;
 }
 
-/* allow long messages to wrap inside feedback table */
-#messageTable td:nth-child(4) {
-    word-break: break-word;
-    max-width: 400px;
+.tab-icon {
+    font-size: 1.3em;
 }
 
-/* Admin user table styling */
-#userTable {
-    width: 100%;
-    border-collapse: collapse;
+/* Tab Sections */
+.tab-section {
+    display: none;
+    animation: fadeIn 0.3s ease-in;
 }
 
-#userTable th,
-#userTable td {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    text-align: left;
+.tab-section.active {
+    display: block;
 }
 
-#userTable tr.user-row:hover {
-    background: #f0f8ff;
-    cursor: pointer;
+/* Section Styling */
+.section-header {
+    margin-bottom: 40px;
 }
 
-#userTable tr.selected-row {
-    background: #cce5ff;
+.section-header h2 {
+    margin: 0 0 12px 0;
+    font-size: 1.8em;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.section-description {
+    margin: 0;
+    color: #999;
+    font-size: 0.95em;
+    max-width: 600px;
+}
+
+/* Table Wrapper */
+.table-wrapper {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+    border: 1px solid #f0f0f0;
 }
 
 #userTable,
@@ -287,37 +444,130 @@ body { background-color: #f5f7fa; }
     border-collapse: collapse;
 }
 
-#userTable tr.selected-row td {
-    border: 1px solid #4ecdc4;
+#userTable th,
+#messageTable th {
+    background: #f8f9fb;
+    padding: 20px;
+    text-align: left;
+    font-weight: 700;
+    color: #555;
+    border-bottom: 2px solid #e0e0e0;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* admin page container - full width frame */
-.admin-container {
-    width: 100%;
-    min-height: 100vh;
-    padding: 20px 40px;
-    background: #f0f4f8; /* light background */
-    box-shadow: none;
-    margin: 0;
+.th-icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 8px;
+    opacity: 0.7;
 }
 
-/* interior panel where content sits */
-.admin-panel {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.admin-container h1 {
-    margin-bottom: 12px;
-}
-
-.admin-container p {
-    margin-bottom: 20px;
+#userTable td,
+#messageTable td {
+    padding: 18px 20px;
+    border-bottom: 1px solid #f0f0f0;
     color: #333;
+}
+
+#userTable tbody tr:nth-child(odd) {
+    background: #fafbfc;
+}
+
+#userTable tr.user-row:hover,
+#messageTable tbody tr:hover {
+    background: #f5f8fe;
+}
+
+#userTable tr.selected-row {
+    background: #e8f0ff;
+}
+
+#userTable tr.selected-row td {
+    border: 1px solid #667eea;
+}
+
+/* Allow long messages to wrap */
+#messageTable td:nth-child(4) {
+    word-break: break-word;
+    max-width: 300px;
+}
+
+/* Section Actions */
+.section-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+}
+
+/* Modal Styling */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+
+.modal-close:hover {
+    opacity: 0.8;
+}
+
+#editUserForm {
+    padding: 30px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
 }
 
 #userTable thead {
