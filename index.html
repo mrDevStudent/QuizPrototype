@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Math Quiz Master � practice arithmetic with multiple choice, true/false and matching quizzes.">
+    <link rel="icon" href="favicon.ico">
+    <title>Math Quiz Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation (hidden by default until login) -->
+    
+    <div id="sidebar" class="sidebar" style="display:none" role="navigation" aria-label="Main navigation">
+        <div class="sidebar-header">
+            <h2><img src="assets/icon-dice.png" alt="Math Quiz" style="width:28px;height:28px;vertical-align:middle;margin-right:8px;"> Math Quiz</h2>
+            <button class="toggle-sidebar" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="navigateToHome()">
+                <img src="assets/icon-home.png" alt="Home" class="nav-icon nav-home" style="width:24px;height:24px;">
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="nav-item" onclick="showQuizSelection()">
+                <img src="assets/icon-play.png" alt="Start Quiz" class="nav-icon nav-start" style="width:24px;height:24px;">
+                <span class="nav-label">Start Quiz</span>
+            </button>
+            <button class="nav-item" onclick="showStatistics()">
+                <img src="assets/icon-stats.png" alt="Statistics" class="nav-icon nav-stats" style="width:24px;height:24px;">
+                <span class="nav-label">Statistics</span>
+            </button>
+            <button class="nav-item" onclick="showAbout()">
+                <img src="assets/icon-info.png" alt="About" class="nav-icon nav-about" style="width:24px;height:24px;">
+                <span class="nav-label">About</span>
+            </button>
+            <button class="nav-item" onclick="showContact()">
+                <img src="assets/icon-phone.png" alt="Contact" class="nav-icon nav-contact" style="width:24px;height:24px;">
+                <span class="nav-label">Contact</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="nav-item logout-btn" onclick="handleLogout()">
+                <img src="assets/icon-logout.png" alt="Logout" class="nav-icon" style="width:24px;height:24px;">
+                <span class="nav-label">Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Front Page -->
+        <div id="frontPage" class="page active">
+            <div class="auth-container">
+                <h1 class="title"><img src="assets/icon-quiz-master.png" alt="Math Quiz" class="title-icon"> Math Quiz Master</h1>
+                <p class="subtitle">Test your math skills and improve your abilities!</p>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="showLoginPage()">Login</button>
+                    <button class="btn btn-secondary" onclick="showRegisterPage()">Register</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div id="loginPage" class="page">
+            <div class="auth-container">
+                <div class="form-container">
+                    <h2>Login</h2>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">Email:</label>
+                            <input type="text" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password:</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="loginPassword" required maxlength="20" data-min="8" data-max="20">
+                                <button type="button" class="toggle-password" data-target="loginPassword" aria-label="Show password">
+                                    <!-- eye icon inserted by JS fallback -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <div class="char-counter" id="loginPasswordCounter">0/20</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="registerPage" class="page">
+            <div class="auth-container">
+                <div class="form-container">
+                    <h2>Register</h2>
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="registerName">Full Name:</label>
+                            <input type="text" id="registerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email:</label>
+                            <input type="email" id="registerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password:</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="registerPassword" required minlength="8" maxlength="20" data-min="8" data-max="20">
+                                <button type="button" class="toggle-password" data-target="registerPassword" aria-label="Show password">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <div class="char-counter" id="registerPasswordCounter">0/20</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <button type="button" class="btn btn-link" onclick="showFrontPage()">Back</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Page (Dashboard) -->
+        <div id="homePage" class="page">
+            <div class="page-header">
+                <h1>Welcome, <span id="userNameDisplay">User</span>!</h1>
+                <p class="header-subtitle">Ready to test your math skills?</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <aside class="dashboard-card profile-card-small">
+                    <div id="dashboardAvatar" class="profile-avatar-large">U</div>
+                    <h3 id="dashboardName">User</h3>
+                    <p id="dashboardEmail">user@email.com</p>
+
+                    <div class="profile-stats-small">
+                        <div class="ps-item">
+                            <strong id="totalQuizzesSmall">0</strong>
+                            <span>Quizzes</span>
+                        </div>
+                        <div class="ps-item">
+                            <strong id="avgScoreSmall">0%</strong>
+                            <span>Average</span>
+                        </div>
+                        <div class="ps-item">
+                            <strong id="bestScoreSmall">0/10</strong>
+                            <span>Best</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button class="btn btn-primary" onclick="navigateToHome()">View Profile</button>
+                        <button class="btn btn-secondary" onclick="navigateToHome()">My Quizzes</button>
+                    </div>
+                </aside>
+
+                <main class="dashboard-card main-card">
+                    <h2>Progress</h2>
+                    <div class="progress-wrap">
+                        <div class="progress-bar-bg">
+                            <div id="progressBarFill" class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-info"><span id="progressPercent">0%</span> Average Score</div>
+                    </div>
+
+                    <h2 style="margin-top:20px;">Recent Attempts</h2>
+                    <div id="recentQuizzes" class="recent-list">
+                        <p class="no-recent">No attempts yet. Play a quiz to see results here.</p>
+                    </div>
+                </main>
+
+                <aside class="dashboard-card actions-card">
+                    <h3>Leaderboard</h3>
+                    <div id="leaderboard" class="leaderboard-list">
+                        <p class="no-leaderboard">No leaderboard data yet.</p>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="aboutPage" class="page">
+            <div class="page-header">
+                <h1>About</h1>
+                <p class="header-subtitle">Learn more about the project and author</p>
+            </div>
+            <div class="profile-container">
+                <div class="profile-card">
+                    <h2>Math Quiz App</h2>
+                    <p>This project is a lightweight, browser-based math quiz application designed to help learners practice arithmetic and basic math concepts. It's built with standard web technologies (HTML, CSS, JS) and stores user data locally for quick prototyping.</p>
+                    <h3 style="margin-top:16px;">Authors</h3>
+                    <p>Areglado, Marc Kent </p>
+                    <p>Bernales, John Rey </p>
+                    <p>Cinco, Mc Kevin </p>
+                    <p>Enguerra, Aaron C. </p>
+                    <p>Jadan, Jean Claire </p>
+                    <p>Marco, Tobey D. </p>
+                    <p>Ombina, Boozer </p>
+                    <p>Ramos, Ian </p>
+                    <p>Salvacion, Rochelle </p>
+                    <p>Tenorio, Emmanuel Robert </p>
+                    <p>Villamor, Marcdanielle </p>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div id="contactPage" class="page">
+            <div class="page-header">
+                <h1>Contact</h1>
+                <p class="header-subtitle">Get in touch</p>
+            </div>
+            <div class="profile-container">
+                <div class="profile-card">
+                    <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                        <div class="form-group">
+                            <label for="contactName">Name:</label>
+                            <input type="text" id="contactName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Email:</label>
+                            <input type="email" id="contactEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactPhone">Phone (optional):</label>
+                            <input type="tel" id="contactPhone">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactMessage">Message:</label>
+                            <textarea id="contactMessage" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+
+                    <div style="margin-top:20px;">
+                        <button class="btn btn-secondary" onclick="renderContacts()">View Saved Messages (admin)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Selection Page -->
+        <div id="quizSelectionPage" class="page">
+            <div class="page-header">
+                <h1><img src="assets/icon-difficulty.png" alt="Quiz" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;"> Select a Quiz Level</h1>
+                <p class="header-subtitle">Choose your difficulty level</p>
+            </div>
+
+            <div class="quiz-selection-grid">
+                <div class="quiz-card">
+                    <div class="card-icon">🟢</div>
+                    <h3>Easy</h3>
+                    <p class="card-desc">Basic arithmetic operations</p>
+                    <p class="card-info">10 questions � 1 minute</p>
+                    <button class="btn btn-primary" onclick="selectQuizLevel('easy')">Select Level</button>
+                </div>
+
+                <div class="quiz-card">
+                    <div class="card-icon">🟡</div>
+                    <h3>Medium</h3>
+                    <p class="card-desc">Intermediate math problems</p>
+                    <p class="card-info">10 questions � 1 minute</p>
+                    <button class="btn btn-primary" onclick="selectQuizLevel('medium')">Select Level</button>
+                </div>
+
+                <div class="quiz-card">
+                    <div class="card-icon">🔴</div>
+                    <h3>Hard</h3>
+                    <p class="card-desc">Advanced math concepts</p>
+                    <p class="card-info">10 questions � 1 minute</p>
+                    <button class="btn btn-primary" onclick="selectQuizLevel('hard')">Select Level</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Type Selection Page -->
+        <div id="gameTypeSelectionPage" class="page">
+            <div class="page-header">
+                <h1><img src="assets/icon-gamemode.png" alt="Game" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;"> Select Game Type</h1>
+                <p class="header-subtitle">Choose how you want to play</p>
+            </div>
+
+            <div class="game-type-grid">
+                <div class="game-type-card">
+                    <div class="type-icon"><img src="assets/icon-multiple-choice.png" alt="Multiple Choice" style="width:48px;height:48px;"></div>
+                    <h3>Multiple Choice</h3>
+                    <p class="type-desc">Select the correct answer from 4 options</p>
+                    <button class="btn btn-primary" onclick="startQuiz(null, 'multipleChoice')">Play Now</button>
+                </div>
+
+                <div class="game-type-card">
+                    <div class="type-icon"><img src="assets/icon-true-false.png" alt="True or False" style="width:48px;height:48px;"></div>
+                    <h3>True or False</h3>
+                    <p class="type-desc">Decide if the statement is true or false</p>
+                    <button class="btn btn-primary" onclick="startQuiz(null, 'trueOrFalse')">Play Now</button>
+                </div>
+
+                <div class="game-type-card">
+                    <div class="type-icon"><img src="assets/icon-matching.png" alt="Matching" style="width:48px;height:48px;"></div>
+                    <h3>Matching</h3>
+                    <p class="type-desc">Match the question with the answer</p>
+                    <button class="btn btn-primary" onclick="startQuiz(null, 'matching')">Play Now</button>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top: 30px; display: block; margin-left: auto; margin-right: auto;" onclick="showQuizSelection()">Back to Levels</button>
+        </div>
+
+        <!-- Statistics Page -->
+        <div id="statisticsPage" class="page">
+            <div class="page-header">
+                <h1><img src="assets/icon-stats.png" alt="Statistics" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;"> Your Statistics</h1>
+                <p class="header-subtitle">Track your progress</p>
+            </div>
+
+            <div id="statsContainer" class="stats-container">
+                <p class="no-stats">No quiz attempts yet. Start your first quiz!</p>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profilePage" class="page">
+            <div class="page-header">
+                <h1><img src="assets/icon-user.png" alt="Profile" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;"> Your Profile</h1>
+                <p class="header-subtitle">Your account information</p>
+            </div>
+
+            <div class="profile-container">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profileAvatar"></div>
+                        <div class="profile-info">
+                            <h2 id="profileName">User</h2>
+                            <p id="profileEmail">user@email.com</p>
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <label>Total Quizzes</label><span id="profileTotalQuizzes">0</span>
+                        </div>
+                        <div class="profile-stat">
+                            <label>Best Score</label><span id="profileBestScore">0/10</span>
+                        </div>
+                        <div class="profile-stat">
+                            <label>Average</label><span id="profileAvgScore">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Page -->
+        <div id="quizPage" class="page">
+            <div class="quiz-header">
+                <div class="quiz-info">
+                    <h2 id="quizTitle"></h2>
+                    <div class="counter" id="questionCounter"></div>
+                </div>
+                <div class="timer" id="timer">
+                    <span id="timeDisplay"></span>
+                </div>
+                <button id="quitBtn" class="btn btn-danger quiz-quit" onclick="quitQuiz()">Quit</button>
+            </div>
+
+            <div class="quiz-container">
+                <div class="question-section">
+                    <div id="questionText"></div>
+                    <div id="answersContainer" class="answers-grid"></div>
+                </div>
+                <div class="quiz-footer">
+                    <button id="nextBtn" class="btn btn-secondary" onclick="nextQuestion()" style="display:none;">Next</button>
+                    <!-- quit button moved to header for better placement -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div id="resultsPage" class="page">
+            <div class="results-container">
+                <h1 id="resultTitle">Quiz Complete!</h1>
+                <div class="results-box">
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <span id="finalScore">0</span>
+                            <span class="score-label">out of 10</span>
+                        </div>
+                    </div>
+                    <div class="results-details">
+                        <p><strong>Level:</strong> <span id="resultLevel">Easy</span></p>
+                        <p><strong>Correct Answers:</strong> <span id="correctCount">0</span></p>
+                        <p><strong>Time Taken:</strong> <span id="timeTaken">0s</span></p>
+                        <p><strong>Percentage:</strong> <span id="resultPercentage">0%</span></p>
+                    </div>
+                </div>
+
+                <div class="results-review" id="resultsReview"></div>
+
+                <div class="results-buttons">
+                    <button class="btn btn-primary" onclick="navigateToHome()">Go to Home</button>
+                    <button class="btn btn-secondary" onclick="retakeQuiz()">Retake Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

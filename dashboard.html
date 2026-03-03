@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button class="btn btn-link" style="position:absolute;top:20px;right:20px;" onclick="handleLogout()">Logout</button>
+    <div class="page-header" style="padding-top:60px;text-align:center;">
+        <h1>Welcome, <span id="dashboardName">User</span>!</h1>
+        <p class="header-subtitle">Ready to test your math skills?</p>
+    </div>
+
+    <div class="dashboard-grid" style="margin:40px;">
+        
+        <main class="dashboard-card main-card">
+            <h2>Progress</h2>
+            <div class="progress-wrap">
+                <div class="progress-bar-bg">
+                    <div id="progressBarFill" class="progress-bar-fill" style="width:0%"></div>
+                </div>
+                <div class="progress-info"><span id="progressPercent">0%</span> Average Score</div>
+            </div>
+            <h2 style="margin-top:20px;">Recent Attempts</h2>
+            <div id="recentQuizzes" class="recent-list">
+                <p class="no-recent">No attempts yet. Play a quiz to see results here.</p>
+            </div>
+        </main>
+        <aside class="dashboard-card actions-card">
+            
+            <h3 style="margin-top:20px;">Leaderboard</h3>
+            <div id="leaderboard" class="leaderboard-list">
+                <p class="no-leaderboard">No leaderboard data yet.</p>
+            </div>
+        </aside>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
