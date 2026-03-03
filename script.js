@@ -831,13 +831,17 @@ function startQuiz(level, gameType) {
     currentQuiz.score = 0;
     currentQuiz.selectedAnswers = [];
     currentQuiz.startTime = Date.now();
-    if (level === 'easy') {
-    currentQuiz.timeLimit = 30;   // 30 secs 
+    // Set time limit FIRST
+if (level === 'easy') {
+    currentQuiz.timeLimit = 30;
 } else if (level === 'medium') {
-    currentQuiz.timeLimit = 60;    // 1 min
+    currentQuiz.timeLimit = 60;
 } else if (level === 'hard') {
-    currentQuiz.timeLimit = 120;    // 2 minutes
+    currentQuiz.timeLimit = 120;
 }
+
+displayQuestion();
+startTimer(); // <-- startTimer() dapat AFTER ng timeLimit setting
 
     const typeLabel = gameType === 'multipleChoice' ? 'Multiple Choice' : gameType === 'trueOrFalse' ? 'True or False' : 'Matching';
     document.getElementById('quizTitle').textContent = `${level.charAt(0).toUpperCase() + level.slice(1)} - ${typeLabel}`;
@@ -851,7 +855,7 @@ function startQuiz(level, gameType) {
     nextBtn.style.display = 'none';
 
     displayQuestion();
-    startTimer();
+   
 }
 
 
@@ -1475,6 +1479,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
+
 
 
 
