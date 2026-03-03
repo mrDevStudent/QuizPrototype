@@ -1439,14 +1439,37 @@ function setupPasswordControls() {
     });
 }
 
+window.addEventListener('beforeunload', function(e) {
+    if (document.getElementById('quizPage') && 
+        document.getElementById('quizPage').classList.contains('active')) {
+        e.preventDefault();
+        e.returnValue = ''; // This shows the browser's "Leave page?" dialog
+    } 
+
+    });
+
 document.addEventListener('DOMContentLoaded', function() {
     initPage();
-    // initial UI state
+
+    // Check if user is already logged in (persists across reloads)
+    const savedUser = localStorage.getItem('currentUser');
     const sb = document.getElementById('sidebar');
-    if (sb) sb.style.display = 'none';
-    // setup password controls and other initial assets
+
+    if (savedUser) {
+        // User is logged in — go straight to dashboard
+        if (sb) sb.style.display = 'flex';
+        navigateToHome();
+    } else {
+        // No user — show front page
+        if (sb) sb.style.display = 'none';
+        showFrontPage();
+    }
+
     try { setupPasswordControls(); } catch (e) { console.warn('setupPasswordControls failed', e); }
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
+
 });
+
+
 
 
