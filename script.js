@@ -831,7 +831,13 @@ function startQuiz(level, gameType) {
     currentQuiz.score = 0;
     currentQuiz.selectedAnswers = [];
     currentQuiz.startTime = Date.now();
-    currentQuiz.timeLimit = 60;
+    if (level === 'easy') {
+    currentQuiz.timeLimit = 30;   // 30 secs 
+} else if (level === 'medium') {
+    currentQuiz.timeLimit = 60;    // 1 min
+} else if (level === 'hard') {
+    currentQuiz.timeLimit = 120;    // 2 minutes
+}
 
     const typeLabel = gameType === 'multipleChoice' ? 'Multiple Choice' : gameType === 'trueOrFalse' ? 'True or False' : 'Matching';
     document.getElementById('quizTitle').textContent = `${level.charAt(0).toUpperCase() + level.slice(1)} - ${typeLabel}`;
@@ -1469,6 +1475,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
+
 
 
 
