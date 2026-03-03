@@ -7,75 +7,151 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <button class="btn btn-link" style="position:absolute;top:20px;right:20px;" onclick="handleLogout()">Logout</button>
     <div class="admin-container">
-        <div class="admin-panel">
-        <h1><img src="assets/icon-lock.png" alt="Admin" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;"> Administrator</h1>
-        <!-- top nav for switching views -->
-        <div class="admin-nav">
-            <button id="navUsers" class="nav-tab active">Users</button>
-            <button id="navFeedback" class="nav-tab">Feedback</button>
-        </div>
-        <p>Below is a list of registered users. You may edit their details or delete accounts.</p>
-        <div id="usersSection">
-        <table id="userTable">
-            <thead>
-                <tr>
-                    <th><img src="assets/icon-user.png" alt="User" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"> Name</th><th><img src="assets/icon-email.png" alt="Email" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"> Email</th><th><img src="assets/icon-key.png" alt="Password" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"> Password</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- rows inserted by JS -->
-            </tbody>
-        </table>
-        <div class="admin-actions">
-            <button id="editUserBtn" class="btn btn-secondary" disabled>Edit Selected</button>
-            <button id="deleteUserBtn" class="btn btn-danger" disabled>Delete Selected</button>
-        </div>
-        </div> <!-- end usersSection -->
-
-        <!-- Feedback messages section -->
-        <div id="feedbackSection" style="display:none;">
-        <h2 style="margin-top:40px;"><img src="assets/icon-bell.png" alt="Feedback" style="width:24px;height:24px;vertical-align:middle;margin-right:8px;"> User Feedback</h2>
-        <table id="messageTable">
-            <thead>
-                <tr>
-                    <th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- messages inserted by JS -->
-            </tbody>
-        </table>
-        <div class="admin-actions" style="margin-top:10px;">
-            <button id="clearMessagesBtn" class="btn btn-danger" disabled>Clear All Messages</button>
-        </div>
-        </div> <!-- end feedbackSection -->
-        </div> <!-- end admin-panel -->
-
-        <!-- hidden edit modal -->
-        <div id="editUserModal" class="modal" style="display:none;">
-            <div class="modal-content">
-                <h2>Edit User</h2>
-                <form id="editUserForm">
-                    <div class="form-group">
-                        <label for="editName">Name:</label>
-                        <input type="text" id="editName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editEmail">Email:</label>
-                        <input type="email" id="editEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editPassword">Password:</label>
-                        <input type="text" id="editPassword" required>
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
-                    </div>
-                </form>
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="admin-header-content">
+                <h1><img src="assets/icon-lock.png" alt="Admin" class="admin-icon"> Administrator Dashboard</h1>
+                <button class="btn btn-link admin-logout" onclick="handleLogout()">Logout</button>
             </div>
+        </div>
+
+        <!-- Dashboard Overview -->
+        <div class="admin-overview">
+            <div class="stat-card">
+                <div class="stat-icon users-icon">👥</div>
+                <div class="stat-content">
+                    <h3>Total Users</h3>
+                    <p class="stat-number" id="totalUsersCount">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon messages-icon">💬</div>
+                <div class="stat-content">
+                    <h3>Messages</h3>
+                    <p class="stat-number" id="totalMessagesCount">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon active-icon">✓</div>
+                <div class="stat-content">
+                    <h3>Active</h3>
+                    <p class="stat-number" id="activeUsersCount">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Panel -->
+        <div class="admin-content">
+            <!-- Navigation Tabs -->
+            <div class="admin-tabs">
+                <button id="navUsers" class="admin-tab active" data-tab="users">
+                    <span class="tab-icon">👤</span> User Management
+                </button>
+                <button id="navFeedback" class="admin-tab" data-tab="feedback">
+                    <span class="tab-icon">📧</span> Feedback & Messages
+                </button>
+            </div>
+
+            <!-- Users Section -->
+            <div id="usersSection" class="tab-section active">
+                <div class="section-header">
+                    <h2>Registered Users</h2>
+                    <p class="section-description">Manage and monitor all registered user accounts. Edit user details or remove accounts as needed.</p>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="userTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <img src="assets/icon-user.png" alt="User" class="th-icon"> 
+                                    Name
+                                </th>
+                                <th>
+                                    <img src="assets/icon-email.png" alt="Email" class="th-icon"> 
+                                    Email
+                                </th>
+                                <th>
+                                    <img src="assets/icon-key.png" alt="Password" class="th-icon"> 
+                                    Password
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- rows inserted by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section-actions">
+                    <button id="editUserBtn" class="btn btn-secondary" disabled>
+                        ✎ Edit Selected
+                    </button>
+                    <button id="deleteUserBtn" class="btn btn-danger" disabled>
+                        🗑 Delete Selected
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            <div id="feedbackSection" class="tab-section">
+                <div class="section-header">
+                    <h2>User Feedback & Messages</h2>
+                    <p class="section-description">View all feedback and messages submitted by users. Monitor user satisfaction and concerns.</p>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="messageTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- messages inserted by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section-actions">
+                    <button id="clearMessagesBtn" class="btn btn-danger" disabled>
+                        🗑 Clear All Messages
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit User Details</h2>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="editUserForm">
+                <div class="form-group">
+                    <label for="editName">Name:</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPassword">Password:</label>
+                    <input type="text" id="editPassword" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 
