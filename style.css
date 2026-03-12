@@ -489,6 +489,19 @@ body { background-color: #f5f7fa; }
     border: 1px solid #667eea;
 }
 
+/* Deleted users table styling */
+#deletedUserTable tr.deleted-user-row:hover {
+    background: #f5f8fe;
+}
+
+#deletedUserTable tr.deleted-user-row.selected-row {
+    background: #e8f0ff;
+}
+
+#deletedUserTable tr.deleted-user-row.selected-row td {
+    border: 1px solid #667eea;
+}
+
 /* Allow long messages to wrap */
 #messageTable td:nth-child(4) {
     word-break: break-word;
