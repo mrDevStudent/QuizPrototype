@@ -48,6 +48,9 @@
                 <button id="navUsers" class="admin-tab active" data-tab="users">
                     <span class="tab-icon">👤</span> User Management
                 </button>
+                <button id="navDeleted" class="admin-tab" data-tab="deleted">
+                    <span class="tab-icon">🗑</span> Deleted Users
+                </button>
                 <button id="navFeedback" class="admin-tab" data-tab="feedback">
                     <span class="tab-icon">📧</span> Feedback & Messages
                 </button>
@@ -90,6 +93,48 @@
                     </button>
                     <button id="deleteUserBtn" class="btn btn-danger" disabled>
                         🗑 Delete Selected
+                    </button>
+                </div>
+            </div>
+
+            <!-- Deleted Users Section -->
+            <div id="deletedSection" class="tab-section">
+                <div class="section-header">
+                    <h2>Deleted Users</h2>
+                    <p class="section-description">View and manage deleted user accounts. Restore users to active status or permanently remove them.</p>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="deletedUserTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <img src="assets/icon-user.png" alt="User" class="th-icon"> 
+                                    Name
+                                </th>
+                                <th>
+                                    <img src="assets/icon-email.png" alt="Email" class="th-icon"> 
+                                    Email
+                                </th>
+                                <th>
+                                    <img src="assets/icon-key.png" alt="Password" class="th-icon"> 
+                                    Password
+                                </th>
+                                <th>Deleted Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- rows inserted by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section-actions">
+                    <button id="restoreUserBtn" class="btn btn-secondary" disabled>
+                        ↩ Restore Selected
+                    </button>
+                    <button id="permanentDeleteBtn" class="btn btn-danger" disabled>
+                        ☠ Permanently Delete
                     </button>
                 </div>
             </div>
