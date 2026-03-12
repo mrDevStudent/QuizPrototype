@@ -41,6 +41,9 @@ function showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
     updateSidebarMenu(pageId);
+    
+    // Save the current page to restore on reload
+    localStorage.setItem('lastPage', pageId);
 }
 
 function updateSidebarMenu(pageId) {
@@ -374,7 +377,72 @@ function handleLogout() {
     }
 }
 
+function openForgotPasswordModal() {
+    document.getElementById('forgotPasswordModal').style.display = 'flex';
+    document.getElementById('resetEmail').focus();
+}
+
+function closeForgotPasswordModal() {
+    document.getElementById('forgotPasswordModal').style.display = 'none';
+    document.getElementById('forgotPasswordForm').reset();
+}
+
+function handleForgotPassword(event) {
+    event.preventDefault();
+    const email = document.getElementById('resetEmail').value.trim();
+    const newPassword = document.getElementById('resetPassword').value;
+
+    if (!email || !newPassword) {
+        alert('Please fill in all fields!');
+        return;
+    }
+
+    // Validate password length
+    if (newPassword.length < 8) {
+        alert('Password must be at least 8 characters.');
+        return;
+    }
+
+    // Check if admin account (cannot reset admin password)
+    if (email === 'admin') {
+        alert('Cannot reset administrator password.');
+        return;
+    }
+
+    // Find user by email
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const userIndex = users.findIndex(u => u.email === email);
+
+    if (userIndex === -1) {
+        alert('Email not found in the system.');
+        return;
+    }
+
+    // Update user password
+    users[userIndex].password = newPassword;
+    localStorage.setItem('users', JSON.stringify(users));
+
+    // If the user is currently logged in, update their session
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser && currentUser.email === email) {
+        currentUser.password = newPassword;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+
+    alert('Password has been reset successfully! Please login with your new password.');
+    closeForgotPasswordModal();
+    showLoginPage();
+}
+
 // Admin utilities ---------------------------------------------------------
+// Simple password hashing function - masks password with asterisks
+function hashPassword(password) {
+    if (!password) return '';
+    const len = password.length;
+    if (len <= 2) return '*'.repeat(len);
+    return password.charAt(0) + '*'.repeat(Math.max(4, len - 2)) + password.charAt(len - 1);
+}
+
 let selectedUserIndex = null;
 
 function setSelectedUser(idx) {
@@ -412,7 +480,7 @@ function loadAdminUsers() {
         // store original index so actions map correctly
         tr.dataset.index = idx;
         tr.innerHTML =
-            `<td>${u.name}</td><td>${u.email}</td><td>${u.password}</td>`;
+            `<td>${u.name}</td><td>${u.email}</td><td>${hashPassword(u.password)}</td>`;
         tr.addEventListener('click', () => setSelectedUser(idx));
         table.appendChild(tr);
     });
@@ -462,14 +530,97 @@ function deleteUser(index) {
             return;
         }
         if (!confirm('Remove this user?')) return;
+        
+        // Move user to deleted users storage
+        const deletedUsers = JSON.parse(localStorage.getItem('deletedUsers')) || [];
+        u.deletedDate = new Date().toLocaleString();
+        deletedUsers.push(u);
+        localStorage.setItem('deletedUsers', JSON.stringify(deletedUsers));
+        
+        // Remove from active users
         users.splice(index, 1);
         localStorage.setItem('users', JSON.stringify(users));
     }
     loadAdminUsers();
+    loadDeletedUsers();
     updateAdminStats();
 }
 
-let editingUserIndex = null;
+function loadDeletedUsers() {
+    const deletedUsers = JSON.parse(localStorage.getItem('deletedUsers')) || [];
+    const table = document.getElementById('deletedUserTable');
+    if (!table) return;
+
+    // remove old rows before reinserting
+    table.querySelectorAll('tr.deleted-user-row').forEach(r => r.remove());
+
+    if (deletedUsers.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="4" style="text-align: center; padding: 20px; color: #999;">No deleted users</td>';
+        table.appendChild(tr);
+        return;
+    }
+
+    deletedUsers.forEach((u, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'deleted-user-row';
+        tr.dataset.index = idx;
+        tr.innerHTML =
+            `<td>${u.name}</td><td>${u.email}</td><td>${hashPassword(u.password)}</td><td>${u.deletedDate || 'N/A'}</td>`;
+        tr.addEventListener('click', () => setSelectedDeletedUser(idx));
+        table.appendChild(tr);
+    });
+    setSelectedDeletedUser(null);
+}
+
+let selectedDeletedUserIndex = null;
+
+function setSelectedDeletedUser(idx) {
+    selectedDeletedUserIndex = idx;
+    document.querySelectorAll('#deletedUserTable .deleted-user-row').forEach(r => r.classList.remove('selected-row'));
+    if (idx !== null) {
+        const row = document.querySelector(`#deletedUserTable .deleted-user-row[data-index="${idx}"]`);
+        if (row) row.classList.add('selected-row');
+    }
+    const restoreBtn = document.getElementById('restoreUserBtn');
+    const permDeleteBtn = document.getElementById('permanentDeleteBtn');
+    if (restoreBtn) restoreBtn.disabled = idx === null;
+    if (permDeleteBtn) permDeleteBtn.disabled = idx === null;
+}
+
+function restoreUser(index) {
+    const deletedUsers = JSON.parse(localStorage.getItem('deletedUsers')) || [];
+    if (index >= 0 && index < deletedUsers.length) {
+        if (!confirm('Restore this user to active status?')) return;
+        
+        const user = deletedUsers[index];
+        delete user.deletedDate;
+        
+        // Move back to active users
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        users.push(user);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // Remove from deleted users
+        deletedUsers.splice(index, 1);
+        localStorage.setItem('deletedUsers', JSON.stringify(deletedUsers));
+    }
+    loadAdminUsers();
+    loadDeletedUsers();
+    updateAdminStats();
+}
+
+function permanentDeleteUser(index) {
+    const deletedUsers = JSON.parse(localStorage.getItem('deletedUsers')) || [];
+    if (index >= 0 && index < deletedUsers.length) {
+        if (!confirm('Permanently delete this user? This action cannot be undone.')) return;
+        
+        deletedUsers.splice(index, 1);
+        localStorage.setItem('deletedUsers', JSON.stringify(deletedUsers));
+    }
+    loadDeletedUsers();
+    updateAdminStats();
+}
 
 function editUser(index) {
     const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -525,20 +676,31 @@ function ensureAdmin() {
 // switch between users and feedback views in admin page
 function showAdminSection(section) {
     const users = document.getElementById('usersSection');
+    const deleted = document.getElementById('deletedSection');
     const feedback = document.getElementById('feedbackSection');
     const usersBtn = document.getElementById('navUsers');
+    const deletedBtn = document.getElementById('navDeleted');
     const feedBtn = document.getElementById('navFeedback');
     if (!users || !feedback || !usersBtn || !feedBtn) return;
-    if (section === 'feedback') {
-        users.classList.remove('active');
+    
+    // Hide all sections and deactivate all buttons
+    users.classList.remove('active');
+    if (deleted) deleted.classList.remove('active');
+    feedback.classList.remove('active');
+    usersBtn.classList.remove('active');
+    if (deletedBtn) deletedBtn.classList.remove('active');
+    feedBtn.classList.remove('active');
+    
+    // Show selected section and activate button
+    if (section === 'deleted') {
+        if (deleted) deleted.classList.add('active');
+        if (deletedBtn) deletedBtn.classList.add('active');
+    } else if (section === 'feedback') {
         feedback.classList.add('active');
-        usersBtn.classList.remove('active');
         feedBtn.classList.add('active');
     } else {
         users.classList.add('active');
-        feedback.classList.remove('active');
         usersBtn.classList.add('active');
-        feedBtn.classList.remove('active');
     }
 }
 
@@ -563,15 +725,27 @@ function initPage() {
     if (document.getElementById('userTable')) {
         ensureAdmin();
         loadAdminUsers();
+        loadDeletedUsers();
         updateAdminStats();
-        // wire up bottom buttons
+        // wire up bottom buttons - active users
         const editBtn = document.getElementById('editUserBtn');
         const delBtn = document.getElementById('deleteUserBtn');
-        if (editBtn) editBtn.addEventListener('click', () => {
-            if (selectedUserIndex !== null) editUser(selectedUserIndex);
-        });
+        // Hide and disable edit button - users table is now view-only
+        if (editBtn) {
+            editBtn.style.display = 'none';
+            editBtn.disabled = true;
+        }
         if (delBtn) delBtn.addEventListener('click', () => {
             if (selectedUserIndex !== null) deleteUser(selectedUserIndex);
+        });
+        // wire up deleted users buttons
+        const restoreBtn = document.getElementById('restoreUserBtn');
+        const permDeleteBtn = document.getElementById('permanentDeleteBtn');
+        if (restoreBtn) restoreBtn.addEventListener('click', () => {
+            if (selectedDeletedUserIndex !== null) restoreUser(selectedDeletedUserIndex);
+        });
+        if (permDeleteBtn) permDeleteBtn.addEventListener('click', () => {
+            if (selectedDeletedUserIndex !== null) permanentDeleteUser(selectedDeletedUserIndex);
         });
         // wire up modal buttons
         const saveBtn = document.getElementById('editUserForm');
@@ -593,9 +767,11 @@ function initPage() {
         }
         // admin nav toggles
         const usersNav = document.getElementById('navUsers');
+        const deletedNav = document.getElementById('navDeleted');
         const feedNav = document.getElementById('navFeedback');
         if (usersNav && feedNav) {
             usersNav.addEventListener('click', () => showAdminSection('users'));
+            if (deletedNav) deletedNav.addEventListener('click', () => showAdminSection('deleted'));
             feedNav.addEventListener('click', () => showAdminSection('feedback'));
         }
         // default view
@@ -1465,12 +1641,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check if user is already logged in (persists across reloads)
     const savedUser = localStorage.getItem('currentUser');
+    const lastPage = localStorage.getItem('lastPage');
     const sb = document.getElementById('sidebar');
 
     if (savedUser) {
-        // User is logged in — go straight to dashboard
+        // User is logged in — restore to last page or go to home
         if (sb) sb.style.display = 'flex';
-        navigateToHome();
+        if (lastPage && lastPage !== 'frontPage' && lastPage !== 'loginPage' && lastPage !== 'registerPage') {
+            // Restore the last page the user was on
+            showPage(lastPage);
+            // If the last page was a quiz, reinitialize it
+            if (lastPage === 'quizPage' && currentQuiz) {
+                startQuiz(currentQuiz.level, currentQuiz.gameType);
+            }
+        } else {
+            // No saved page or user returned from public page, go to home
+            navigateToHome();
+        }
     } else {
         // No user — show front page
         if (sb) sb.style.display = 'none';
@@ -1481,7 +1668,6 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
-
 
 
 
