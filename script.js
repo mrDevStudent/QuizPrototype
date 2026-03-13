@@ -434,6 +434,11 @@ function handleForgotPassword(event) {
     showLoginPage();
 }
 
+function hashPassword(password) {
+    if (!password) return '';
+    return '*'.repeat(password.length);
+}
+
 // Admin utilities ---------------------------------------------------------
 // Simple password hashing function - masks password with asterisks
 
@@ -1663,6 +1668,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
+
 
 
 
