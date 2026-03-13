@@ -436,10 +436,7 @@ function handleForgotPassword(event) {
 
 // Admin utilities ---------------------------------------------------------
 // Simple password hashing function - masks password with asterisks
-function hashPassword(password) {
-    if (!password) return '';
-    return '*'.repeat(password.length);
-}
+
 
 let selectedUserIndex = null;
 
@@ -1666,6 +1663,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
+
 
 
 
