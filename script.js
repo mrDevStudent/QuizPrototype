@@ -438,9 +438,7 @@ function handleForgotPassword(event) {
 // Simple password hashing function - masks password with asterisks
 function hashPassword(password) {
     if (!password) return '';
-    const len = password.length;
-    if (len <= 2) return '*'.repeat(len);
-    return password.charAt(0) + '*'.repeat(Math.max(4, len - 2)) + password.charAt(len - 1);
+    return '*'.repeat(password.length);
 }
 
 let selectedUserIndex = null;
@@ -1668,6 +1666,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadAssetsConfig(); } catch (e) { console.warn('loadAssetsConfig failed', e); }
 
 });
+
 
 
 
